@@ -1,26 +1,91 @@
 @import "tailwindcss";
 
 :root {
+  /* Variables de color base */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #ffffffb4;
+  --purple: #9378ff;
+  --black: #131316;
+  --blackLight: #212126;
+  --border: #d9d9de;
+  
+  /* Variables adicionales para efectos */
+  --purple-light: rgba(108, 71, 255, 0.15);
+  --purple-hover: #5a3bd9;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
+  --shadow-purple: 0 6px 20px rgba(108, 71, 255, 0.25);
+  
+  /* Transiciones estándar */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* Bordes redondeados */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-purple: var(--purple);
+  --color-purple-light: var(--purple-light);
+  --color-purple-hover: var(--purple-hover);
+  --color-blackLight: var(--blackLight);
+  --color-border: var(--border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  /* Sombras */
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-purple: var(--shadow-purple);
+  
+  /* Transiciones */
+  --transition-fast: var(--transition-fast);
+  --transition-normal: var(--transition-normal);
+  --transition-slow: var(--transition-slow);
+  
+  /* Bordes redondeados */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --border: #2a2a2f;
+    --blackLight: #27272c;
+    
+    /* Ajuste de sombras para modo oscuro */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 10px 40px -10px rgba(0, 0, 0, 0.3);
+    --shadow-purple: 0 6px 20px rgba(108, 71, 255, 0.35);
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans, 'Geist', Arial, Helvetica, sans-serif);
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+.cl-avatarBox {
+  width: 50px;
+  height: 50px;
+}
+
+
+

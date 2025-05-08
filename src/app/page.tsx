@@ -1,103 +1,174 @@
-import Image from "next/image";
+"use client"
+import { useEffect, useRef } from "react"
+import Link from "next/link"
+import { Shield, LogIn, UserPlus } from 'lucide-react'
+import gsap from "gsap"
+import { TextPlugin } from "gsap/TextPlugin"
+import { useIntroText } from "@/hooks/useIntroText"
+import Image from "next/image"
+import { SoundToggle } from "@/components/SoundToggle"
+import { useGlobalMusic } from "@/hooks/useGlobalMusic"
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(TextPlugin)
+}
+
+const hasSeenIntro = typeof window !== "undefined" ? localStorage.getItem("seenIntro") === "true" : false
+
+const INTRO_TEXTS = [
+  "Bienvenido a MiduGuard...",
+  "Tú eres la primera línea de defensa de Midulandia.",
+  "Deberás decidir quién entra y quién no.",
+  "Verifica documentos. Detecta impostores. Protege la frontera.",
+  "Prepárate para tu misión...",
+]
+const SHORT_TEXTS = [
+  "Bienvenido a MiduGuard..."
+]
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const mainContentRef = useRef(null)
+  const imgRef = useRef(null)
+  const { textRef, introCompleted } = useIntroText(hasSeenIntro ? INTRO_TEXTS : INTRO_TEXTS )
+  
+  useEffect(() => {
+    if (introCompleted && mainContentRef.current) {
+      gsap.fromTo(
+        mainContentRef.current,
+        { opacity: 0, y: 50 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 2,
+          ease: "power3.out",
+        },
+      )
+    }
+  }, [introCompleted])
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  useGlobalMusic('/intro.mp3', 0.4)
+  useEffect(() => {
+    if (imgRef.current) {
+      gsap.fromTo(
+        imgRef.current,
+        { opacity: 0, scale: 0.8 },
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 0.5,
+          ease: "power3.out",
+        },
+      )
+    }
+  }, [])
+  
+  return (
+    <div className="flex flex-col max-h-[100vh] items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8 text-foreground relative">
+      <div className="absolute top-6 right-6 md:top-10 md:right-20 z-10">
+        <SoundToggle />
+      </div>
+
+      {!introCompleted ? (
+        <div className="max-w-md w-full space-y-8 flex flex-col items-center justify-center">
+          <div 
+            ref={imgRef} 
+            className="border-2 border-purple/20 p-4 mb-6 rounded-lg shadow-purple opacity-0 transition-all duration-300 hover:shadow-lg"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+            <Image 
+              src="/midulandia.png" 
+              alt="Logo MiduGuard" 
+              width={500} 
+              height={200}
+              className="rounded-md" 
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          </div>
+          <div className="h-24 flex items-center justify-center p-6 border border-border rounded-lg shadow-md backdrop-blur-sm glass">
+            <p className="text-2xl font-mono" ref={textRef}>
+              {/* El texto viene aquí desde useIntroText */}
+            </p>
+            <span className="blink-cursor ml-1 text-2xl text-purple">|</span>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      ) : (
+        <div className="max-w-md w-full space-y-10 opacity-0 scaleIn" ref={mainContentRef}>
+          <div className="text-center">
+            <div className="flex justify-center mb-4">
+              <div className="p-4 rounded-full bg-purple/10 shadow-purple transition-transform duration-300 hover:scale-105">
+                <Shield className="h-16 w-16 text-purple" />
+              </div>
+            </div>
+            <h1 className="mt-6 text-4xl font-bold text-gradient">MiduGuard</h1>
+            <p className="mt-3 text-xl text-purple font-mono">El guardián de Midulandia</p>
+            <p className="mt-4 text-foreground/80 font-mono text-sm max-w-sm mx-auto">
+              Asume el papel de guardia fronterizo y decide quién puede entrar a Midulandia, el paraíso de los
+              programadores
+            </p>
+          </div>
+
+          <div className="mt-8 space-y-5">
+            <Link
+              href="/auth/sign-in"
+              className="group relative w-full flex justify-center py-4 px-5 border border-purple/30 rounded-lg text-foreground bg-blackLight/5 hover:bg-purple hover:text-white focus:outline-none transition-all duration-300 shadow-md hover:shadow-purple"
+            >
+              <span className="absolute left-0 inset-y-0 flex items-center pl-4">
+                <LogIn className="h-5 w-5 text-purple group-hover:text-white transition-colors duration-300" />
+              </span>
+              <span className="font-medium">Iniciar sesión</span>
+            </Link>
+
+            <Link
+              href="/auth/sign-up"
+              className="group relative w-full flex justify-center py-4 px-5 border border-purple rounded-lg text-foreground bg-purple/10 hover:bg-purple hover:text-white focus:outline-none transition-all duration-300 shadow-md hover:shadow-purple"
+            >
+              <span className="absolute left-0 inset-y-0 flex items-center pl-4">
+                <UserPlus className="h-5 w-5 text-purple group-hover:text-white transition-colors duration-300" />
+              </span>
+              <span className="font-medium">Registrarme</span>
+            </Link>
+          </div>
+
+          <div className="mt-10">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-background text-foreground/70 font-mono">Características</span>
+              </div>
+            </div>
+
+            <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <div className="bg-blackLight/5 p-5 rounded-lg border-l-3 border-purple shadow-md hover:shadow-purple transition-all duration-300 hover:translate-y-[-2px] group">
+                <h3 className="font-medium text-purple group-hover:text-gradient transition-all duration-300">Autenticación con Clerk</h3>
+                <p className="mt-2 text-sm text-foreground/70 font-mono">
+                  Aprende a implementar un sistema de autenticación robusto con Clerk
+                </p>
+              </div>
+
+              <div className="bg-blackLight/5 p-5 rounded-lg border-l-3 border-purple/70 shadow-md hover:shadow-purple transition-all duration-300 hover:translate-y-[-2px] group">
+                <h3 className="font-medium text-purple/90 group-hover:text-gradient transition-all duration-300">SQL Interactivo</h3>
+                <p className="mt-2 text-sm text-foreground/70 font-mono">
+                  Practica consultas SQL para verificar la información de usuarios
+                </p>
+              </div>
+
+              <div className="bg-blackLight/5 p-5 rounded-lg border-l-3 border-purple/60 shadow-md hover:shadow-purple transition-all duration-300 hover:translate-y-[-2px] group">
+                <h3 className="font-medium text-purple/80 group-hover:text-gradient transition-all duration-300">Gameplay Inmersivo</h3>
+                <p className="mt-2 text-sm text-foreground/70 font-mono">
+                  Siente la presión de tomar decisiones mientras los Midulanders esperan
+                </p>
+              </div>
+
+              <div className="bg-blackLight/5 p-5 rounded-lg border-l-3 border-purple/50 shadow-md hover:shadow-purple transition-all duration-300 hover:translate-y-[-2px] group">
+                <h3 className="font-medium text-purple/70 group-hover:text-gradient transition-all duration-300">Aprende mientras juegas</h3>
+                <p className="mt-2 text-sm text-foreground/70 font-mono">
+                  Domina conceptos de seguridad web de manera divertida
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  );
+  )
 }
