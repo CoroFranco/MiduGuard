@@ -10,7 +10,7 @@
 
 
 📖 Concepto del juego
-MiduLand Border Control es un juego educativo que combina la mecánica de gestión de fronteras de "Papers, Please" con el aprendizaje práctico de SQL. Como oficial de inmigración de MiduLandia, tu trabajo es verificar los datos de los "MiduLovers" (desarrolladores) que desean entrar al país.
+MiduGuard es un juego educativo que combina la mecánica de gestión de fronteras de "Papers, Please" con el aprendizaje práctico de SQL. Como oficial de inmigración de MiduLandia, tu trabajo es verificar los datos de los "MiduLovers" (desarrolladores) que desean entrar al país.
 A medida que avanzas, aprenderás comandos SQL progresivamente más complejos mientras tomas decisiones morales que afectan la historia del juego. ¿Aceptarás a un programador con documentos falsificados pero que escapa de un país en guerra? ¿O rechazarás a alguien con credenciales perfectas pero con vínculos a organizaciones de ciberdelincuencia?
 Cada día en el juego trae nuevos desafíos, reglas cambiantes y dilemas que pondrán a prueba tus habilidades técnicas y éticas.
 
