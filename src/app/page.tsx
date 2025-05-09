@@ -2,12 +2,15 @@
 import { useEffect, useRef } from "react"
 import Link from "next/link"
 import { Shield, LogIn, UserPlus } from 'lucide-react'
+import { useRouter } from "next/navigation"
 import gsap from "gsap"
 import { TextPlugin } from "gsap/TextPlugin"
 import { useIntroText } from "@/hooks/useIntroText"
 import Image from "next/image"
+import { SignedIn, useUser } from '@clerk/nextjs';
 import { SoundToggle } from "@/components/SoundToggle"
 import { useGlobalMusic } from "@/hooks/useGlobalMusic"
+import { LoadingScreen } from "@/components/LoadingScreen"
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(TextPlugin)
@@ -27,16 +30,41 @@ const SHORT_TEXTS = [
 ]
 
 export default function Home() {
+  const {isLoaded, isSignedIn} = useUser()
   const mainContentRef = useRef(null)
+  const router = useRouter()
   const imgRef = useRef(null)
-  const { textRef, introCompleted } = useIntroText(hasSeenIntro ? INTRO_TEXTS : INTRO_TEXTS )
+  const introRef = useRef(null)
+  const { textRef, introCompleted } = useIntroText(hasSeenIntro ? SHORT_TEXTS : INTRO_TEXTS )
   
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.push('/game')
+    }
+  }, [isLoaded, isSignedIn, router])
+  
+  useGlobalMusic('/intro.mp3', 0.4)
   useEffect(() => {
     if (introCompleted && mainContentRef.current) {
       gsap.fromTo(
         mainContentRef.current,
+        { opacity: 0 },
+        {
+          opacity: 1,
+          duration: 2,
+          ease: "circ.in",
+        },
+      )
+    }
+  }, [introCompleted])
+
+  useEffect(() => {
+    if (introRef.current) {
+      gsap.fromTo(
+        introRef.current,
         { opacity: 0, y: 50 },
         {
+          delay: 1,
           opacity: 1,
           y: 0,
           duration: 2,
@@ -44,9 +72,8 @@ export default function Home() {
         },
       )
     }
-  }, [introCompleted])
+  }, [])
 
-  useGlobalMusic('/intro.mp3', 0.4)
   useEffect(() => {
     if (imgRef.current) {
       gsap.fromTo(
@@ -63,13 +90,15 @@ export default function Home() {
   }, [])
   
   return (
-    <div className="flex flex-col max-h-[100vh] items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8 text-foreground relative">
+    <div className="flex flex-col max-h-[100vh] items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8 text-foreground relative overflow-hidden" >
       <div className="absolute top-6 right-6 md:top-10 md:right-20 z-10">
         <SoundToggle />
       </div>
-
-      {!introCompleted ? (
-        <div className="max-w-md w-full space-y-8 flex flex-col items-center justify-center">
+      <SignedIn>
+        <LoadingScreen />
+      </SignedIn>
+      {!introCompleted && !isSignedIn ? (
+        <div className="max-w-md w-full space-y-8 flex flex-col items-center justify-center opacity-0" ref={introRef} >      
           <div 
             ref={imgRef} 
             className="border-2 border-purple/20 p-4 mb-6 rounded-lg shadow-purple opacity-0 transition-all duration-300 hover:shadow-lg"
@@ -169,6 +198,7 @@ export default function Home() {
           </div>
         </div>
       )}
-    </div>
+      
+    </div>   
   )
 }

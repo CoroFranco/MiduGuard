@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { UserButton, useUser } from "@clerk/nextjs"
 import gsap from "gsap"
-import { Terminal, AlertTriangle, Clock, Code, FileText, Database, User } from "lucide-react"
+import {  AlertTriangle, Clock, Database, User } from "lucide-react"
 import Image from "next/image"
 import { SoundToggle } from "@/components/SoundToggle"
 import { useGlobalMusic } from "@/hooks/useGlobalMusic"
@@ -14,13 +14,8 @@ import { dark } from "@clerk/themes"
 
 export default function GamePage() {
   const { user } = useUser()
-  const [currentVisitor, setCurrentVisitor] = useState(0)
   const [gameTime, setGameTime] = useState(300) // 5 minutes in seconds
-  const [score, setScore] = useState(0)
-  const [consoleOutput, setConsoleOutput] = useState("")
-  const [codeValue, setCodeValue] = useState("// Escribe tu consulta SQL aquí\n")
-  const [decision, setDecision] = useState<"pending" | "approved" | "rejected">("pending")
-  const [showFeedback, setShowFeedback] = useState(false)
+
 
   const headerRef = useRef<HTMLDivElement>(null)
   const visitorAreaRef = useRef<HTMLDivElement>(null)
@@ -80,7 +75,7 @@ export default function GamePage() {
           </div>
           <div className="flex items-center gap-2">
             <Database className="h-5 w-5 text-purple" />
-            <span className="font-mono text-lg">{score} pts</span>
+            <span className="font-mono text-lg">0 pts</span>
           </div>
         </div>
 
@@ -138,7 +133,7 @@ export default function GamePage() {
           <div className="flex-1 flex flex-col gap-4">
             {/* Code editor */}
             <div className="flex-1 border border-border rounded-lg overflow-hidden">
-              <CodeEditor value={codeValue} onChange={setCodeValue} language="sql" />
+              <CodeEditor />
             </div>
           </div>
         </div>
