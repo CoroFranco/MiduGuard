@@ -12,8 +12,13 @@
     "@clerk/localizations": "^3.15.1",
     "@clerk/nextjs": "^6.19.1",
     "@clerk/themes": "^2.2.42",
+    "@codemirror/commands": "^6.8.1",
+    "@codemirror/lang-sql": "^6.8.0",
+    "@codemirror/theme-one-dark": "^6.1.2",
+    "@codemirror/view": "^6.36.8",
     "@libsql/client": "^0.15.4",
     "@monaco-editor/react": "^4.7.0",
+    "codemirror": "^6.0.1",
     "framer-motion": "^12.10.4",
     "gsap": "^3.13.0",
     "lucide-react": "^0.508.0",
@@ -26,15 +31,15 @@
     "zustand": "^5.0.4"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
-    "@eslint/eslintrc": "^3"
+    "tailwindcss": "^4",
+    "typescript": "^5"
   },
   "eslintConfig": {
     "extends": "standard"

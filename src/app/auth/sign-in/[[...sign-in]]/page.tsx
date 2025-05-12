@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useLayoutEffect, useRef } from "react"
 import { SignIn } from "@clerk/nextjs"
 import gsap from "gsap"
 import { ArrowLeft, ShieldCheck, Lock, AlertCircle } from "lucide-react"
@@ -21,55 +21,55 @@ export default function SignInPage() {
   const watermarkRef = useRef<HTMLDivElement>(null)
 
   useGlobalMusic('/log.mp3', 0.05)
-  useEffect(() => {
+  useLayoutEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } })
 
     tl.fromTo(
       backLinkRef.current,
       { x: -20, opacity: 0 },
-      { x: 0, opacity: 0.6, duration: 0.5 },
+      { x: 0, opacity: 0.6, duration: 1 },
       "-=1.0"
     )
 
     tl.fromTo(
       iconRef.current,
       { y: -20, opacity: 0, scale: 0.8 },
-      { y: 0, opacity: 1, scale: 1, duration: 0.7, ease: "back.out(1.5)" },
+      { y: 0, opacity: 1, scale: 1, duration: 1.2, ease: "back.out(1.5)" },
       "-=0.5"
     )
 
     tl.fromTo(
       [titleRef.current, subtitleRef.current],
       { y: 20, opacity: 0 },
-      { y: 0, opacity: 1, stagger: 0.15, duration: 0.7 },
+      { y: 0, opacity: 1, stagger: 0.15, duration: 1.3 },
       "-=0.5"
     )
 
     tl.fromTo(
       formContainerRef.current,
       { y: 30, opacity: 0, scale: 0.97 },
-      { y: 0, opacity: 1, scale: 1, duration: 0.8 },
+      { y: 0, opacity: 1, scale: 1, duration: 1.4 },
       "-=0.4"
     )
 
     tl.fromTo(
       decorationRef.current,
       { scale: 0, opacity: 0, rotation: -45 },
-      { scale: 1, opacity: 1, rotation: 0, duration: 0.6, ease: "back.out(2.5)" },
+      { scale: 1, opacity: 1, rotation: 0, duration: 1, ease: "back.out(2.5)" },
       "-=0.6"
     )
 
     tl.fromTo(
       infoBoxRef.current,
       { y: 15, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.5 },
+      { y: 0, opacity: 1, duration: 1 },
       "-=0.4"
     )
 
     tl.fromTo(
       watermarkRef.current,
       { opacity: 0 },
-      { opacity: 0.4, duration: 0.5 },
+      { opacity: 0.4, duration: 1 },
       "-=0.2"
     )
 

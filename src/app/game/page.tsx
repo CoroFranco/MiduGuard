@@ -1,20 +1,36 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { UserButton, useUser } from "@clerk/nextjs"
 import gsap from "gsap"
-import {  AlertTriangle, Clock, Database, User } from "lucide-react"
+import {  AlertTriangle, Clock, Database, User, BadgeInfo } from "lucide-react"
 import Image from "next/image"
 import { SoundToggle } from "@/components/SoundToggle"
 import { useGlobalMusic } from "@/hooks/useGlobalMusic"
 import { CodeEditor } from "@/components/CodeEditor"
 import { VisitorCard } from "@/components/VisitorCard"
 import { dark } from "@clerk/themes"
+import { GameModal } from "@/components/GameModal"
 
+
+function random() {
+  const numeros = [...Array(10).keys()];
+  const resultados = [];
+
+  while (numeros.length > 0) {
+    const indiceAleatorio = Math.floor(Math.random() * numeros.length);
+    const numero = numeros.splice(indiceAleatorio, 1)[0];  // Saca el número aleatorio
+    resultados.push(numero);
+  }
+
+  return resultados;
+}
 
 export default function GamePage() {
   const { user } = useUser()
   const [gameTime, setGameTime] = useState(300) // 5 minutes in seconds
+  const [isModalOpen, setIsModalOpen] = useState({tutorial:true, tables: false})
+  const [currentVisitor, setCurrentVisitor] = useState(null) 
 
 
   const headerRef = useRef<HTMLDivElement>(null)
@@ -24,8 +40,33 @@ export default function GamePage() {
 
   useGlobalMusic('/game.mp3', 0.05)
 
-  // Initialize game
+  const executeCode = async (): void => {
+    try {
+      const res = await fetch('/api/db', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ content: 'SELECT * FROM midulovers' })
+      })
+
+      const data = await res.json()
+      if (data?.rows?.[0]) {
+        setCurrentVisitor(data?.rows)
+      } else {
+
+      }
+    } catch (error) {
+      console.error('error' + error)
+    }
+  }
+
   useEffect(() => {
+    executeCode()
+  }, [])
+
+  // Initialize game
+  useLayoutEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } })
 
     tl.fromTo(headerRef.current, { y: -50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 })
@@ -38,9 +79,14 @@ export default function GamePage() {
       { y: 0, opacity: 1, stagger: 0.2, duration: 0.8 },
       "-=0.5",
     )
+    return () => {
+      tl.kill()
+    }
+  }, [])
 
-    // Game timer
-    const timer = setInterval(() => {
+  useEffect(() => {
+const timer = setInterval(() => {
+      if(isModalOpen.tables || isModalOpen.tutorial) return
       setGameTime((prev) => {
         if (prev <= 0) {
           clearInterval(timer)
@@ -52,12 +98,12 @@ export default function GamePage() {
 
     return () => {
       clearInterval(timer)
-      tl.kill()
     }
-  }, [])
+  }, [isModalOpen])
 
   // Format time as MM:SS
   const formatTime = (seconds: number) => {
+
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
@@ -65,9 +111,17 @@ export default function GamePage() {
 
   
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
+    <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden relative w-full">
       {/* Header with game info */}
+      <GameModal isOpen={isModalOpen.tutorial} onClose={() => setIsModalOpen(prev => ({...prev, tutorial: false}))} title='titulo' message='mensaje' />
+        <GameModal isOpen={isModalOpen.tables} onClose={() => setIsModalOpen(prev => ({...prev, tables: false}))} title='Tablas' message='mensaje' />
+      <div className="absolute z-40 top-[20%] right-20 bg-white/50 rounded-2xl backdrop:backdrop-blur-3xl flex justify-center place-items-center " >
+          <button className="flex justify-center place-items-end w-20 h-20 cursor-pointer" onClick={() => setIsModalOpen(prev => ({...prev, tables: true}))}>
+            <BadgeInfo className="w-14 h-14 text-purple-900 animate-bounce"/>
+          </button>
+        </div>
       <div ref={headerRef} className="flex fixed z-20 w-full justify-between items-center p-4 opacity-0">
+
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-purple" />
@@ -125,7 +179,9 @@ export default function GamePage() {
         {/* Visitor verification area */}
         <div ref={visitorAreaRef} className="w-1/2 border-r py-2 border-border flex flex-col h-full opacity-0">
           {/* Visitor card */}
-         <VisitorCard />
+          {currentVisitor && 
+         <VisitorCard  visitor={currentVisitor[1]}/>
+          }
         </div>
 
         {/* Code console area */}

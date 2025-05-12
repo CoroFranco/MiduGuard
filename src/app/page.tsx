@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useRef } from "react"
+import { useEffect, useLayoutEffect, useRef } from "react"
 import Link from "next/link"
 import { Shield, LogIn, UserPlus } from 'lucide-react'
 import { useRouter } from "next/navigation"
@@ -44,27 +44,27 @@ export default function Home() {
   }, [isLoaded, isSignedIn, router])
   
   useGlobalMusic('/intro.mp3', 0.4)
-  useEffect(() => {
-    if (introCompleted && mainContentRef.current) {
-      gsap.fromTo(
-        mainContentRef.current,
-        { opacity: 0 },
-        {
-          opacity: 1,
-          duration: 2,
-          ease: "circ.in",
-        },
-      )
-    }
-  }, [introCompleted])
+  useLayoutEffect(() => {
+  if (introCompleted && mainContentRef.current) {
+    gsap.fromTo(
+      mainContentRef.current,
+      { opacity: 0, y: 50 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 2,
+        ease: "power3.out",
+      },
+    )
+  }
+}, [introCompleted])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (introRef.current) {
       gsap.fromTo(
         introRef.current,
         { opacity: 0, y: 50 },
         {
-          delay: 1,
           opacity: 1,
           y: 0,
           duration: 2,
@@ -74,7 +74,7 @@ export default function Home() {
     }
   }, [])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (imgRef.current) {
       gsap.fromTo(
         imgRef.current,
@@ -97,7 +97,7 @@ export default function Home() {
       <SignedIn>
         <LoadingScreen />
       </SignedIn>
-      {!introCompleted && !isSignedIn ? (
+      {!introCompleted ? (
         <div className="max-w-md w-full space-y-8 flex flex-col items-center justify-center opacity-0" ref={introRef} >      
           <div 
             ref={imgRef} 
@@ -119,7 +119,7 @@ export default function Home() {
           </div>
         </div>
       ) : (
-        <div className="max-w-md w-full space-y-10 opacity-0 scaleIn" ref={mainContentRef}>
+        <div className="max-w-md w-full space-y-10 opacity-0" ref={mainContentRef}>
           <div className="text-center">
             <div className="flex justify-center mb-4">
               <div className="p-4 rounded-full bg-purple/10 shadow-purple transition-transform duration-300 hover:scale-105">
