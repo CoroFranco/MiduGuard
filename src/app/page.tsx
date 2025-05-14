@@ -35,7 +35,7 @@ export default function Home() {
   const router = useRouter()
   const imgRef = useRef(null)
   const introRef = useRef(null)
-  const { textRef, introCompleted } = useIntroText(hasSeenIntro ? SHORT_TEXTS : INTRO_TEXTS )
+  const { textRef, introCompleted } = useIntroText(hasSeenIntro ? INTRO_TEXTS : INTRO_TEXTS )
   
   useEffect(() => {
     if (isLoaded && isSignedIn) {

@@ -72,7 +72,7 @@ export const CodeEditor: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-[500px] bg-gray-900 border border-gray-700 rounded-lg overflow-hidden">
+    <div className="flex flex-col h-full bg-gray-900 border border-gray-700 rounded-lg overflow-hidden">
       <div className="bg-gray-800 p-2 flex justify-between items-center border-b border-gray-700">
         <div className="text-sm font-mono text-gray-300">SQL Editor</div>
         <div className="flex gap-2">

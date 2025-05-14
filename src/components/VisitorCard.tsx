@@ -1,48 +1,199 @@
 "use client"
 
-import { useState, useRef, useLayoutEffect } from "react"
+import { useState, useRef, useLayoutEffect, useEffect } from "react"
 import Image from "next/image"
-import { RotateCw, ZoomIn, ZoomOut } from "lucide-react"
+import { RotateCw, ZoomIn, ZoomOut, Award, Check, X, Stamp } from "lucide-react"
 import gsap from "gsap"
 import { LoadingScreen } from "@/components/LoadingScreen"
+import { SpeechBubble } from "@/components/SpeechBubble"
+import { Visitor } from "@/types/visitorType"
+import Clerk from "@/components/Clerk"
 
-interface Visitor {
-  id: string
-  nombre: string
-  edad: string
-  pais_origen: string
-  profesion: string
-  fecha_ingreso: string
-  foto_url: string
-}
 
 interface VisitorCardProps {
   visitor?: Visitor
+  onApprove?: (id: string) => void
+  onReject?: (id: string) => void
 }
 
-export function VisitorCard({ visitor }: VisitorCardProps) {
+export function VisitorCard({ visitor, onApprove, onReject }: VisitorCardProps) {
   const [isFlipped, setIsFlipped] = useState(false)
   const [zoomLevel, setZoomLevel] = useState(0.8)
-  const [currentTab, setCurrentTab] = useState<"person" | "documents">("person")
+  const [currentTab, setCurrentTab] = useState<"person" | "documents" | "skills">("person")
   const [currentVisitor, setCurrentVisitor] = useState<Visitor | undefined>(visitor)
   const [previousVisitor, setPreviousVisitor] = useState<Visitor | null>(null)
+  const [stampEffect, setStampEffect] = useState<"approved" | "rejected" | null>(null)
+  const [showStampOptions, setShowStampOptions] = useState(false)
+  const [isProcessingStamp, setIsProcessingStamp] = useState(false)
+  
+  const approveStampRef = useRef<HTMLButtonElement>(null)
+  const rejectStampRef = useRef<HTMLButtonElement>(null)
+  const stampOptionsRef = useRef<HTMLDivElement>(null)
+  const stampButtonRef = useRef<HTMLButtonElement>(null)
 
   const cardRef = useRef<HTMLDivElement>(null)
   const currentImageRef = useRef<HTMLDivElement>(null)
   const previousImageRef = useRef<HTMLDivElement>(null)
   const documentRef = useRef<HTMLDivElement>(null)
 
+  const handleApproveClick = () => {
+    if (!currentVisitor || isProcessingStamp) return
+    
+    setIsProcessingStamp(true)
+    setStampEffect("approved")
+    
+    if (approveStampRef.current) {
+      // Start with stamp drawer closing animation
+      if (stampOptionsRef.current) {
+        gsap.to(
+          stampOptionsRef.current,
+          { 
+            width: 0, 
+            opacity: 0,
+            x: -50,
+            duration: 0.3,
+            ease: "power2.in",
+            onComplete: () => {
+              setShowStampOptions(false)
+              
+              // Then do the stamp animation
+              gsap.fromTo(
+                approveStampRef.current,
+                { rotation: -45, scale: 1.2 },
+                { 
+                  rotation: 0, 
+                  scale: 1,
+                  duration: 0.5,
+                  ease: "elastic.out(1, 0.3)",
+                  onComplete: () => {
+                    if (onApprove) {
+                      onApprove(currentVisitor.id)
+                    }
+                    
+                    // Reset after delay
+                    setTimeout(() => {
+                      setStampEffect(null)
+                      setIsProcessingStamp(false)
+                    }, 5000)
+                  }
+                }
+              )
+            }
+          }
+        )
+      }
+    }
+  }
+  
+  const handleRejectClick = () => {
+    if (!currentVisitor || isProcessingStamp) return
+    
+    setIsProcessingStamp(true)
+    setStampEffect("rejected")
+    
+    if (rejectStampRef.current) {
+      // Start with stamp drawer closing animation
+      if (stampOptionsRef.current) {
+        gsap.to(
+          stampOptionsRef.current,
+          { 
+            width: 0, 
+            opacity: 0,
+            x: -50,
+            duration: 0.3,
+            ease: "power2.in",
+            onComplete: () => {
+              setShowStampOptions(false)
+              
+              // Then do the stamp animation
+              gsap.fromTo(
+                rejectStampRef.current,
+                { rotation: 45, scale: 1.2 },
+                { 
+                  rotation: 0, 
+                  scale: 1,
+                  duration: 0.5,
+                  ease: "elastic.out(1, 0.3)",
+                  onComplete: () => {
+                    if (onReject) {
+                      onReject(currentVisitor.id)
+                    }
+                    
+                    // Reset after delay
+                    setTimeout(() => {
+                      setStampEffect(null)
+                      setIsProcessingStamp(false)
+                    }, 1500)
+                  }
+                }
+              )
+            }
+          }
+        )
+      }
+    }
+  }
+
+  const toggleStampOptions = () => {
+    if (isProcessingStamp) return
+    
+    if (stampOptionsRef.current) {
+      if (!showStampOptions) {
+        // Animate stamp button on press
+        if (stampButtonRef.current) {
+          gsap.to(stampButtonRef.current, {
+            scale: 0.9,
+            duration: 0.1,
+            ease: "power1.in",
+            onComplete: () => {
+              gsap.to(stampButtonRef.current, {
+                scale: 1,
+                duration: 0.2,
+                ease: "power1.out"
+              })
+            }
+          })
+        }
+        
+        // Show animation - horizontal slide from left to right with bounce effect
+        setShowStampOptions(true)
+        gsap.fromTo(
+          stampOptionsRef.current,
+          { 
+            width: 0, 
+            opacity: 0,
+            x: -50
+          },
+          { 
+            width: 'auto', 
+            opacity: 1,
+            x: 0,
+            duration: 0.6,
+            ease: "back.out(1.2)"
+          }
+        )
+      } else {
+        // Hide animation - horizontal slide back to left
+        gsap.to(
+          stampOptionsRef.current,
+          { 
+            width: 0, 
+            opacity: 0,
+            x: -50,
+            duration: 0.4,
+            ease: "power2.in",
+            onComplete: () => setShowStampOptions(false)
+          }
+        )
+      }
+    }
+  }
+  
   const handleZoomIn = () => setZoomLevel((prev) => Math.min(prev + 0.1, 1.5))
   const handleZoomOut = () => setZoomLevel((prev) => Math.max(prev - 0.1, 0.8))
-
-  // Handle visitor prop changes with animation
-  useLayoutEffect(() => {
-    if (!visitor || !currentVisitor) {
-      setCurrentVisitor(visitor);
-      return;
-    }
-    
-    if (visitor.id !== currentVisitor.id) {
+  
+  useEffect(() => {
+    if (visitor?.id !== currentVisitor?.id) {
       setPreviousVisitor(currentVisitor)
 
       if (currentImageRef.current) {
@@ -52,18 +203,18 @@ export function VisitorCard({ visitor }: VisitorCardProps) {
           duration: 2,
           ease: "power3.out",
           onComplete: () => {
-        setCurrentVisitor(visitor)
-        gsap.fromTo(
-        currentImageRef.current,
-        { x: -300, opacity: 0 },
-        {
-          delay:0.2,
-          x: 0,
-          opacity: 1,
-          duration: 3,
-          ease: "expo.out",
-        },
-      )
+            setCurrentVisitor(visitor)
+            gsap.fromTo(
+              currentImageRef.current,
+              { x: -300, opacity: 0 },
+              {
+                delay: 0.2,
+                x: 0,
+                opacity: 1,
+                duration: 3,
+                ease: "expo.out",
+              },
+            )
           },
         })
       } else {
@@ -72,8 +223,40 @@ export function VisitorCard({ visitor }: VisitorCardProps) {
     }
   }, [visitor, currentVisitor])
   
+  // Close stamp options if clicked outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        showStampOptions && 
+        !isProcessingStamp &&
+        stampOptionsRef.current && 
+        !stampOptionsRef.current.contains(event.target as Node) &&
+        event.target instanceof Element &&
+        !event.target.closest('.stamp-button')
+      ) {
+        // Animate close when clicking outside
+        if (stampOptionsRef.current) {
+          gsap.to(
+            stampOptionsRef.current,
+            { 
+              width: 0, 
+              opacity: 0,
+              x: -50,
+              duration: 0.4,
+              ease: "power2.in",
+              onComplete: () => setShowStampOptions(false)
+            }
+          )
+        }
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showStampOptions, isProcessingStamp])
 
-  // Animate document flip
   useLayoutEffect(() => {
     if (documentRef.current) {
       if (isFlipped) {
@@ -92,24 +275,20 @@ export function VisitorCard({ visitor }: VisitorCardProps) {
     }
   }, [isFlipped])
 
-  // Tab switching animation
-  const switchTab = (tab: "person" | "documents") => {
+  const switchTab = (tab: "person" | "documents" | "skills") => {
     if (tab !== currentTab) {
-      // Fade out current content
       gsap.to(`.tab-content-${currentTab}`, {
         opacity: 0,
-        y: 20,
         duration: 0.3,
+        ease: "circle.in",
         onComplete: () => {
           setCurrentTab(tab)
-          // Fade in new content
-          gsap.fromTo(`.tab-content-${tab}`, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.4 })
+          gsap.fromTo(`.tab-content-${tab}`, { opacity: 0 }, { opacity: 1, duration: 0.4 })
         },
       })
     }
   }
 
-  // Render loading state if no visitor data is available
   if (!currentVisitor) {
     return (
       <LoadingScreen />
@@ -118,12 +297,14 @@ export function VisitorCard({ visitor }: VisitorCardProps) {
 
   if(!visitor) return
 
+  // Parse skills into array
+  const skillsArray = currentVisitor.skills ? currentVisitor.skills.split(',').map(skill => skill.trim()) : []
+
   return (
     <div
       ref={cardRef}
-      className="relative w-full mt-2 bg-gray-900 rounded-xl border-2 border-gray-700 shadow-2xl overflow-hidden flex flex-col h-[500px]"
+      className="relative w-full mt-2 bg-gray-900 rounded-xl border-2 border-gray-700 shadow-2xl overflow-hidden flex flex-col h-full"
     >
-      {/* Booth Header */}
       <div className="bg-gray-800 p-2 border-b-2 border-gray-700 flex justify-between items-center shrink-0">
         <div className="flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-full bg-rose-500"></div>
@@ -134,7 +315,6 @@ export function VisitorCard({ visitor }: VisitorCardProps) {
         <div className="text-xs text-gray-300">DÍA 1</div>
       </div>
 
-      {/* Tabs */}
       <div className="flex text-xs border-b-2 border-gray-700 shrink-0">
         <button
           onClick={() => switchTab("person")}
@@ -156,21 +336,133 @@ export function VisitorCard({ visitor }: VisitorCardProps) {
         >
           DOCUMENTOS
         </button>
+        <button
+          onClick={() => switchTab("skills")}
+          className={`flex-1 hover:cursor-pointer py-1.5 text-center font-medium ${
+            currentTab === "skills"
+              ? "bg-gray-700 text-white border-b-2 border-background"
+              : "text-gray-300 hover:bg-gray-800"
+          }`}
+        >
+          HABILIDADES
+        </button>
       </div>
 
-      {/* Main Content Area */}
+      {/* Stamp desk area - Papers Please style */}
+      <div className="absolute bottom-[10%] left-0 z-30">
+        <button 
+          ref={stampButtonRef}
+          onClick={toggleStampOptions}
+          disabled={isProcessingStamp}
+          className={`stamp-button relative flex h-[300px] flex-col gap-2 place-items-center justify-center bg-gray-700 border-2 border-gray-800 rounded-md p-3 shadow-lg ${isProcessingStamp ? 'opacity-75 cursor-not-allowed' : 'hover:bg-gray-600'} transition-all`}
+          style={{ boxShadow: "inset 0px -4px 0px rgba(0,0,0,0.3)" }}
+        >
+          <Stamp className={isProcessingStamp ? "opacity-50" : ""} />
+        </button>
+        
+        {/* Stamp options drawer - horizontal, Papers Please style */}
+        <div 
+          ref={stampOptionsRef}
+          className={`absolute left-full bottom-[30%] overflow-hidden w-0 opacity-0`}
+          style={{ height: "132px" }}
+        >
+          <div className="bg-gray-800 border-2 border-gray-900 rounded-md p-3 shadow-xl h-full flex items-center">
+            <div className="flex items-center gap-4 h-full">
+              <button
+                ref={approveStampRef}
+                onClick={handleApproveClick}
+                disabled={isProcessingStamp}
+                className={`stamp-option cursor-pointer h-full flex flex-col items-center justify-center transform hover:scale-105 transition-all px-2 ${isProcessingStamp ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <div className="mb-1 text-emerald-300 text-xs font-bold">Authorized</div>
+                <div className="h-20 w-20 flex items-center justify-center relative">
+                  <div className="absolute inset-0 bg-emerald-900 rounded-sm rotate-3 opacity-30"></div>
+                  <div className="bg-gray-900 p-0.5 rounded-sm border-2 border-emerald-800" style={{ boxShadow: "inset 0px -3px 0px rgba(0,0,0,0.5)" }}>
+                    <div className="w-14 h-14 rounded-sm border-2 border-emerald-600 bg-emerald-700 flex items-center justify-center p-1" 
+                         style={{ boxShadow: "inset 0px -2px 8px rgba(0,0,0,0.4)" }}>
+                      <div className="border-4 border-emerald-500 rounded-sm w-full h-full flex items-center justify-center">
+                        <Check className="h-8 w-8 text-emerald-200" strokeWidth={4} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-1 flex items-center">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400 mr-1"></div>
+                  <div className="w-14 h-1 bg-emerald-700"></div>
+                </div>
+              </button>
+              
+              <div className="h-[90%] w-px bg-gray-700"></div>
+              
+              <button
+                ref={rejectStampRef}
+                onClick={handleRejectClick}
+                disabled={isProcessingStamp}
+                className={`stamp-option cursor-pointer h-full flex flex-col items-center justify-center transform hover:scale-105 transition-all px-2 ${isProcessingStamp ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <div className="mb-1 text-rose-300 text-xs font-bold">Unauthorized</div>
+                <div className="h-20 w-20 flex items-center justify-center relative">
+                  <div className="absolute inset-0 bg-rose-900 rounded-sm -rotate-3 opacity-30"></div>
+                  <div className="bg-gray-900 p-0.5 rounded-sm border-2 border-rose-800" style={{ boxShadow: "inset 0px -3px 0px rgba(0,0,0,0.5)" }}>
+                    <div className="w-14 h-14 rounded-sm border-2 border-rose-600 bg-rose-700 flex items-center justify-center p-1" 
+                         style={{ boxShadow: "inset 0px -2px 8px rgba(0,0,0,0.4)" }}>
+                      <div className="border-4 border-rose-500 rounded-sm w-full h-full flex items-center justify-center">
+                        <X className="h-8 w-8 text-rose-200" strokeWidth={4} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-1 flex items-center">
+                  <div className="w-2 h-2 rounded-full bg-rose-400 mr-1"></div>
+                  <div className="w-14 h-1 bg-rose-700"></div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="flex-1 overflow-hidden relative">
-        {/* Person Inspection Tab */}
+        {/* Overlay de sello cuando se aprueba o rechaza */}
+        {stampEffect && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
+            <div className={`transform rotate-[-25deg] opacity-90 ${
+              stampEffect === "approved" 
+                ? "text-emerald-600" 
+                : "text-rose-600"
+            }`}>
+              <div className={`border-[12px] ${
+                stampEffect === "approved" 
+                  ? "border-emerald-600" 
+                  : "border-rose-600"
+              } rounded-md flex items-center justify-center`} style={{ width: "300px", height: "150px" }}>
+                <div className={`absolute inset-0 ${
+                  stampEffect === "approved" 
+                    ? "bg-emerald-600" 
+                    : "bg-rose-600"
+                } opacity-10`}></div>
+                <div className="relative">
+                  <div className="absolute -inset-2 border-4 border-dashed rounded-md opacity-60 rotate-2"></div>
+                  <span className="text-4xl flex font-black tracking-wider" style={{ textShadow: "0 2px 4px rgba(0,0,0,0.3)" }}>
+                    <Clerk />
+                    {stampEffect === "approved" ? "lerk" : "lerk"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {currentTab === "person" && (
           <div className="absolute inset-0 bg-black tab-content-person">
-            {/* Window Background */}
+            <div className="relative right-[5%] -top-4">
+            <SpeechBubble phrase={currentVisitor.frase} />
+            </div>
             <div className="absolute inset-0 z-0">
               <Image src="/window.png" alt="window background" fill className="object-cover opacity-70" />
             </div>
 
-            {/* Person Image */}
             <div className="absolute inset-0 flex items-center justify-center z-10">
-              {/* Current visitor image */}
               <div
                 ref={currentImageRef}
                 className="relative px-4"
@@ -184,8 +476,7 @@ export function VisitorCard({ visitor }: VisitorCardProps) {
                   className="object-contain max-h-[180px] xs:max-h-[220px] sm:max-h-[250px]"
                 />
               </div>
-
-              {/* Previous visitor image (for transition) */}
+              
               {previousVisitor && (
                 <div ref={previousImageRef} className="absolute opacity-0" style={{ pointerEvents: "none" }}>
                   <Image
@@ -199,7 +490,6 @@ export function VisitorCard({ visitor }: VisitorCardProps) {
               )}
             </div>
 
-            {/* Zoom Controls */}
             <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-3 z-20">
               <button
                 onClick={handleZoomOut}
@@ -219,11 +509,39 @@ export function VisitorCard({ visitor }: VisitorCardProps) {
           </div>
         )}
 
-        {/* Documents Inspection Tab */}
+        {currentTab === "skills" && (
+          <div className="absolute inset-0 bg-gray-800 overflow-y-auto p-4 tab-content-skills">
+            <div className="bg-gray-900 rounded-lg border-2 border-gray-700 p-4 shadow-lg">
+              <h2 className="text-lg font-bold text-white mb-4 flex items-center">
+                <Award className="h-5 w-5 mr-2 text-amber-400" />
+                Habilidades y Competencias
+              </h2>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="col-span-1 sm:col-span-2 mb-2">
+                  <p className="text-sm text-gray-300">Habilidades de {currentVisitor.nombre}:</p>
+                </div>
+                
+                <div className="flex flex-wrap gap-2">
+                  {skillsArray.length > 0 ? skillsArray.map((skill, index) => (
+                    <span 
+                      key={index} 
+                      className="bg-gray-700 text-white px-3 py-1 rounded-full text-xs font-medium shadow-sm"
+                    >
+                      {skill}
+                    </span>
+                  )) : (
+                    <span className="text-gray-400 text-sm">No se han registrado habilidades</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {currentTab === "documents" && (
           <div className="absolute inset-0 bg-gray-800 overflow-y-auto p-2 tab-content-documents">
             <div className="relative min-h-[250px] h-full">
-              {/* Document with GSAP-enhanced flip animation */}
               <div
                 ref={documentRef}
                 className="relative w-full h-full"
@@ -231,7 +549,6 @@ export function VisitorCard({ visitor }: VisitorCardProps) {
                   transformStyle: "preserve-3d",
                 }}
               >
-                {/* Front of document */}
                 <div
                   className="absolute inset-0 backface-hidden bg-gray-900 border-4 border-background rounded-xl p-3 shadow-lg"
                   style={{ backfaceVisibility: "hidden" }}
@@ -284,6 +601,20 @@ export function VisitorCard({ visitor }: VisitorCardProps) {
                         </p>
                       </div>
 
+                      <div>
+                        <p className="text-xs text-backborder-background font-medium uppercase">Fecha Nacimiento</p>
+                        <p className="text-xs font-bold text-gray-200 border-b border-background1">
+                          {currentVisitor?.fecha_nacimiento}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs text-backborder-background font-medium uppercase">Tipo Documento</p>
+                        <p className="text-xs font-bold text-gray-200 border-b border-background1">
+                          {currentVisitor?.tipo_documento}
+                        </p>
+                      </div>
+
                       <div className="col-span-1 sm:col-span-2">
                         <p className="text-xs text-backborder-background font-medium uppercase">Profesión</p>
                         <p className="text-xs font-bold text-gray-200 border-b border-background1">
@@ -310,6 +641,15 @@ export function VisitorCard({ visitor }: VisitorCardProps) {
                   </div>
 
                   <div className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-3">
+                      <div>
+                        <p className="text-xs text-backborder-background font-medium uppercase">Documento ID</p>
+                        <p className="text-xs font-bold text-gray-200 border-b border-background1">
+                          {currentVisitor?.documento_id}
+                        </p>
+                      </div>
+                    </div>
+
                     <div className="mt-3 p-2 border-2 border-dashed border-background rounded-lg bg-gray-800 shadow-inner">
                       <div className="flex items-start">
                         <div>
@@ -330,7 +670,6 @@ export function VisitorCard({ visitor }: VisitorCardProps) {
         )}
       </div>
 
-      {/* Action Controls - Fixed at bottom */}
       <div className="border-t-2 border-gray-700 p-2 bg-gray-800 flex justify-between items-center shrink-0">
         {currentTab === "documents" && (
           <button
@@ -341,6 +680,7 @@ export function VisitorCard({ visitor }: VisitorCardProps) {
             <span className="text-xs font-medium">Girar Documento</span>
           </button>
         )}
+        
       </div>
     </div>
   )
