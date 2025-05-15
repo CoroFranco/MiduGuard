@@ -1,35 +1,42 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, ReactNode } from "react"
 import { X, AlertCircle, CheckCircle, Info, AlertTriangle } from "lucide-react"
 
 type MessageType = "info" | "warning" | "error" | "success"
 
 interface GameModalProps {
   isOpen: boolean
-  onClose: () => void
+  onClose?: () => void
   title: string
-  message: string
+  message?: string
+  content?: ReactNode
   type?: MessageType
-  autoClose?: number // Time in ms to auto-close the modal
+  autoClose?: number
 }
 
-export function GameModal({ isOpen, onClose, title, message, type = "info", autoClose }: GameModalProps) {
+export function GameModal({ 
+  isOpen, 
+  onClose, 
+  title, 
+  message, 
+  content, 
+  type = "info", 
+  autoClose 
+}: GameModalProps) {
   const [isVisible, setIsVisible] = useState(false)
 
-  // Handle animation states
   useEffect(() => {
     if (isOpen) {
       setIsVisible(true)
     } else {
       const timer = setTimeout(() => {
         setIsVisible(false)
-      }, 300) // Match this with the CSS transition time
+      }, 300) 
       return () => clearTimeout(timer)
     }
   }, [isOpen])
 
-  // Handle auto-close
   useEffect(() => {
     if (isOpen && autoClose) {
       const timer = setTimeout(() => {
@@ -39,10 +46,8 @@ export function GameModal({ isOpen, onClose, title, message, type = "info", auto
     }
   }, [isOpen, autoClose, onClose])
 
-  // Early return if not open
   if (!isOpen && !isVisible) return null
 
-  // Get the appropriate icon and colors based on message type
   const getTypeStyles = () => {
     switch (type) {
       case "warning":
@@ -106,7 +111,8 @@ export function GameModal({ isOpen, onClose, title, message, type = "info", auto
 
         {/* Body */}
         <div className="p-4 text-gray-200">
-          <p>{message}</p>
+          {/* Muestra el componente React si existe, de lo contrario muestra el mensaje de texto */}
+          {content ? content : <p>{message}</p>}
         </div>
 
         {/* Footer */}

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react"
 import gsap from "gsap"
 import { TextPlugin } from "gsap/TextPlugin"
 import { useSoundStore } from "@/store/soundStore"
+import { useUser } from "@clerk/nextjs"
+
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(TextPlugin)
@@ -12,6 +14,7 @@ export function useIntroText(introTexts: string[]) {
   const textRef = useRef(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const {isLoaded} = useUser()
 
   const [introStep, setIntroStep] = useState(0)
   const [introCompleted, setIntroCompleted] = useState(false)
@@ -28,6 +31,7 @@ export function useIntroText(introTexts: string[]) {
 
   // Control de animación del texto
   useEffect(() => {
+    if(!isLoaded) return
     if (introStep < introTexts.length) {
       const tl = gsap.timeline({
         onComplete: () => {
@@ -72,7 +76,7 @@ export function useIntroText(introTexts: string[]) {
       }
       localStorage.setItem("seenIntro", "true")
     }
-  }, [introStep, introTexts, introCompleted])
+  }, [introStep, introTexts, introCompleted, isLoaded])
 
   // Reproducir sonido separado de la animación
   useEffect(() => {

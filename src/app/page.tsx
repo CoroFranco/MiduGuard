@@ -7,7 +7,7 @@ import gsap from "gsap"
 import { TextPlugin } from "gsap/TextPlugin"
 import { useIntroText } from "@/hooks/useIntroText"
 import Image from "next/image"
-import { SignedIn, useUser } from '@clerk/nextjs';
+import {  useUser } from '@clerk/nextjs';
 import { SoundToggle } from "@/components/SoundToggle"
 import { useGlobalMusic } from "@/hooks/useGlobalMusic"
 import { LoadingScreen } from "@/components/LoadingScreen"
@@ -35,7 +35,8 @@ export default function Home() {
   const router = useRouter()
   const imgRef = useRef(null)
   const introRef = useRef(null)
-  const { textRef, introCompleted } = useIntroText(hasSeenIntro ? INTRO_TEXTS : INTRO_TEXTS )
+
+  const { textRef, introCompleted } = useIntroText(hasSeenIntro ? SHORT_TEXTS : INTRO_TEXTS )
   
   useEffect(() => {
     if (isLoaded && isSignedIn) {
@@ -44,6 +45,7 @@ export default function Home() {
   }, [isLoaded, isSignedIn, router])
   
   useGlobalMusic('/intro.mp3', 0.4)
+
   useLayoutEffect(() => {
   if (introCompleted && mainContentRef.current) {
     gsap.fromTo(
@@ -60,6 +62,7 @@ export default function Home() {
 }, [introCompleted])
 
   useLayoutEffect(() => {
+    if(!isLoaded) return
     if (introRef.current) {
       gsap.fromTo(
         introRef.current,
@@ -72,9 +75,10 @@ export default function Home() {
         },
       )
     }
-  }, [])
+  }, [isLoaded])
 
   useLayoutEffect(() => {
+    if(!isLoaded) return
     if (imgRef.current) {
       gsap.fromTo(
         imgRef.current,
@@ -87,16 +91,17 @@ export default function Home() {
         },
       )
     }
-  }, [])
+  }, [isLoaded])
+
+  if (!isLoaded) {
+    return <LoadingScreen />
+  }
   
   return (
     <div className="flex flex-col max-h-[100vh] items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8 text-foreground relative overflow-hidden" >
       <div className="absolute top-6 right-6 md:top-10 md:right-20 z-10">
         <SoundToggle />
       </div>
-      <SignedIn>
-        <LoadingScreen />
-      </SignedIn>
       {!introCompleted ? (
         <div className="max-w-md w-full space-y-8 flex flex-col items-center justify-center opacity-0" ref={introRef} >      
           <div 

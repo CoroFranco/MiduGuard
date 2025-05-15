@@ -43,7 +43,6 @@ export function VisitorCard({ visitor, onApprove, onReject }: VisitorCardProps) 
     setStampEffect("approved")
     
     if (approveStampRef.current) {
-      // Start with stamp drawer closing animation
       if (stampOptionsRef.current) {
         gsap.to(
           stampOptionsRef.current,
@@ -56,7 +55,6 @@ export function VisitorCard({ visitor, onApprove, onReject }: VisitorCardProps) 
             onComplete: () => {
               setShowStampOptions(false)
               
-              // Then do the stamp animation
               gsap.fromTo(
                 approveStampRef.current,
                 { rotation: -45, scale: 1.2 },
@@ -68,9 +66,7 @@ export function VisitorCard({ visitor, onApprove, onReject }: VisitorCardProps) 
                   onComplete: () => {
                     if (onApprove) {
                       onApprove(currentVisitor.id)
-                    }
-                    
-                    // Reset after delay
+                    }                   
                     setTimeout(() => {
                       setStampEffect(null)
                       setIsProcessingStamp(false)
@@ -92,7 +88,6 @@ export function VisitorCard({ visitor, onApprove, onReject }: VisitorCardProps) 
     setStampEffect("rejected")
     
     if (rejectStampRef.current) {
-      // Start with stamp drawer closing animation
       if (stampOptionsRef.current) {
         gsap.to(
           stampOptionsRef.current,
@@ -103,9 +98,7 @@ export function VisitorCard({ visitor, onApprove, onReject }: VisitorCardProps) 
             duration: 0.3,
             ease: "power2.in",
             onComplete: () => {
-              setShowStampOptions(false)
-              
-              // Then do the stamp animation
+              setShowStampOptions(false)           
               gsap.fromTo(
                 rejectStampRef.current,
                 { rotation: 45, scale: 1.2 },
@@ -348,22 +341,52 @@ export function VisitorCard({ visitor, onApprove, onReject }: VisitorCardProps) 
         </button>
       </div>
 
-      {/* Stamp desk area - Papers Please style */}
-      <div className="absolute bottom-[10%] left-0 z-30">
+       
+
+      <div className="flex-1 overflow-hidden relative">
+        {stampEffect && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
+            <div className={`transform rotate-[-25deg] opacity-90 ${
+              stampEffect === "approved" 
+                ? "text-emerald-600" 
+                : "text-rose-600"
+            }`}>
+              <div className={`border-[12px] ${
+                stampEffect === "approved" 
+                  ? "border-emerald-600" 
+                  : "border-rose-600"
+              } rounded-md flex items-center justify-center`} style={{ width: "300px", height: "150px" }}>
+                <div className={`absolute inset-0 ${
+                  stampEffect === "approved" 
+                    ? "bg-emerald-600" 
+                    : "bg-rose-600"
+                } opacity-10`}></div>
+                <div className="relative">
+                  <div className="absolute -inset-2 border-4 border-dashed rounded-md opacity-60 rotate-2"></div>
+                  <span className="text-4xl flex font-black tracking-wider" style={{ textShadow: "0 2px 4px rgba(0,0,0,0.3)" }}>
+                    <Clerk />
+                    {stampEffect === "approved" ? "lerk" : "lerk"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="absolute z-30 h-full">
         <button 
           ref={stampButtonRef}
           onClick={toggleStampOptions}
           disabled={isProcessingStamp}
-          className={`stamp-button relative flex h-[300px] flex-col gap-2 place-items-center justify-center bg-gray-700 border-2 border-gray-800 rounded-md p-3 shadow-lg ${isProcessingStamp ? 'opacity-75 cursor-not-allowed' : 'hover:bg-gray-600'} transition-all`}
+          className={`cursor-pointer relative flex h-full flex-col gap-2 place-items-center justify-center bg-gray-700 border-2 border-gray-800 rounded-md p-3 shadow-lg ${isProcessingStamp ? 'opacity-75 cursor-not-allowed' : 'hover:bg-gray-600'} transition-all`}
           style={{ boxShadow: "inset 0px -4px 0px rgba(0,0,0,0.3)" }}
         >
           <Stamp className={isProcessingStamp ? "opacity-50" : ""} />
         </button>
         
-        {/* Stamp options drawer - horizontal, Papers Please style */}
         <div 
           ref={stampOptionsRef}
-          className={`absolute left-full bottom-[30%] overflow-hidden w-0 opacity-0`}
+          className={`absolute left-full top-1/2 -translate-y-1/2 overflow-hidden w-0 opacity-0`}
           style={{ height: "132px" }}
         >
           <div className="bg-gray-800 border-2 border-gray-900 rounded-md p-3 shadow-xl h-full flex items-center">
@@ -422,37 +445,6 @@ export function VisitorCard({ visitor, onApprove, onReject }: VisitorCardProps) 
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden relative">
-        {/* Overlay de sello cuando se aprueba o rechaza */}
-        {stampEffect && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
-            <div className={`transform rotate-[-25deg] opacity-90 ${
-              stampEffect === "approved" 
-                ? "text-emerald-600" 
-                : "text-rose-600"
-            }`}>
-              <div className={`border-[12px] ${
-                stampEffect === "approved" 
-                  ? "border-emerald-600" 
-                  : "border-rose-600"
-              } rounded-md flex items-center justify-center`} style={{ width: "300px", height: "150px" }}>
-                <div className={`absolute inset-0 ${
-                  stampEffect === "approved" 
-                    ? "bg-emerald-600" 
-                    : "bg-rose-600"
-                } opacity-10`}></div>
-                <div className="relative">
-                  <div className="absolute -inset-2 border-4 border-dashed rounded-md opacity-60 rotate-2"></div>
-                  <span className="text-4xl flex font-black tracking-wider" style={{ textShadow: "0 2px 4px rgba(0,0,0,0.3)" }}>
-                    <Clerk />
-                    {stampEffect === "approved" ? "lerk" : "lerk"}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {currentTab === "person" && (
           <div className="absolute inset-0 bg-black tab-content-person">
             <div className="relative right-[5%] -top-4">
@@ -510,7 +502,7 @@ export function VisitorCard({ visitor, onApprove, onReject }: VisitorCardProps) 
         )}
 
         {currentTab === "skills" && (
-          <div className="absolute inset-0 bg-gray-800 overflow-y-auto p-4 tab-content-skills">
+          <div className="absolute pl-20 inset-0 bg-gray-800 overflow-y-auto p-4 tab-content-skills">
             <div className="bg-gray-900 rounded-lg border-2 border-gray-700 p-4 shadow-lg">
               <h2 className="text-lg font-bold text-white mb-4 flex items-center">
                 <Award className="h-5 w-5 mr-2 text-amber-400" />
@@ -540,7 +532,7 @@ export function VisitorCard({ visitor, onApprove, onReject }: VisitorCardProps) 
         )}
 
         {currentTab === "documents" && (
-          <div className="absolute inset-0 bg-gray-800 overflow-y-auto p-2 tab-content-documents">
+          <div className="absolute pl-20 inset-0 bg-gray-800 overflow-y-auto p-2 tab-content-documents">
             <div className="relative min-h-[250px] h-full">
               <div
                 ref={documentRef}

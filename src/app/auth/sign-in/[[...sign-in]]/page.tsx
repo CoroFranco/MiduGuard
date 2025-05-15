@@ -129,11 +129,7 @@ export default function SignInPage() {
             </div>
           </div>
 
-          {/* Clerk SignIn con estilo */}
           
-          
-
-          {/* Nota informativa */}
           <div className="mt-4 p-3 border border-dashed border-document-gray rounded-sm">
             <div className="flex items-start">
               <AlertCircle className="h-4 w-4 text-document-gray mr-2 mt-0.5 flex-shrink-0" />
@@ -146,7 +142,6 @@ export default function SignInPage() {
         </div>
       </div>
 
-      {/* Marca de agua */}
       <div className="absolute bottom-4 right-4 opacity-30">
         <p className="text-xs font-mono text-document-gray">MIDUGUARD · CONTROL FRONTERIZO</p>
       </div>

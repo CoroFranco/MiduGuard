@@ -1,21 +1,26 @@
 "use client"
-import React, { useState } from "react"
+import React, { useRef, useState } from "react"
 import { basicSetup } from "codemirror"
 import { EditorView, keymap } from "@codemirror/view"
 import { defaultKeymap } from "@codemirror/commands"
 import { sql } from "@codemirror/lang-sql"
 import { oneDark } from "@codemirror/theme-one-dark"
 import { Play, RotateCw } from "lucide-react"
+import { GameModal } from "@/components/GameModal"
 
-export const CodeEditor: React.FC = () => {
+export const CodeEditor: React.FC<{
+  onQueryExecuted?: (wasExecuted: boolean) => void
+}> = ({ onQueryExecuted }) => {
   const initialCode = `-- Escribe tu codigo SQL aqui`
 
   const [code, setCode] = useState<string>(initialCode)
   const [output, setOutput] = useState<string>("")
-  const [editorView, setEditorView] = useState<EditorView | null>(null)
+  const [modalOpen, setModalOpen] = useState<boolean>(false)
+  const [dangerousQuery, setDangerousQuery] = useState<string>("")
+  const editorRef = useRef<EditorView | null>(null)
 
   const createEditor = (el: HTMLDivElement | null) => {
-    if (el && !editorView) {
+    if (el && !editorRef.current) {
       const view = new EditorView({
         doc: initialCode,
         extensions: [
@@ -26,17 +31,36 @@ export const CodeEditor: React.FC = () => {
           EditorView.updateListener.of((update) => {
             if (update.docChanged) {
               setCode(update.state.doc.toString())
-              
             }
           })
         ],
         parent: el
       })
-      setEditorView(view)
+      editorRef.current = view
     }
   }
 
-  const executeCode = async (): void => {
+  const isDangerousQuery = (query: string): boolean => {
+    const dangerousKeywords = [
+      'DROP', 'TRUNCATE', 'DELETE FROM', 'UPDATE', 'ALTER', 
+      'CREATE DATABASE', 'DROP DATABASE', 'RENAME', 'MODIFY',
+      'GRANT', 'REVOKE', 'INSERT INTO'
+    ]
+    
+    const uppercaseQuery = query.toUpperCase()
+    return dangerousKeywords.some(keyword => 
+      uppercaseQuery.includes(keyword) && 
+      !uppercaseQuery.includes('-- ' + keyword) // Ignora comentarios
+    )
+  }
+
+  const executeCode = async (): Promise<void> => {
+    if (isDangerousQuery(code)) {
+      setDangerousQuery(code)
+      setModalOpen(true)
+      return
+    }
+
     setOutput("Ejecutando código...")
     try {
       const res = await fetch('/api/db', {
@@ -50,29 +74,57 @@ export const CodeEditor: React.FC = () => {
       const data = await res.json()
       if (data?.rows?.[0]) {
         setOutput(JSON.stringify(data.rows, null, 2))
+        if (onQueryExecuted) {
+        onQueryExecuted(true)
+    }
       } else {
         setOutput("No se encontraron datos.")
       }
+
+    
     } catch (error) {
-      setOutput("Error al ejecutar el código. Inténtalo de nuevo." + error)
+      setOutput("Error al ejecutar el código. Inténtalo de nuevo. " + error)
     }
   }
 
   const resetCode = (): void => {
-    if (editorView) {
-      editorView.dispatch({
+    if (editorRef.current) {
+      editorRef.current.dispatch({
         changes: {
           from: 0,
-          to: editorView.state.doc.length,
+          to: editorRef.current.state.doc.length,
           insert: initialCode
         }
       })
+      setCode(initialCode)
     }
     setOutput("")
   }
 
+  const closeModal = () => {
+    setModalOpen(false)
+  }
+
+  const ModalContent = () => (
+    <div className="flex flex-col gap-4">
+      <p className="text-base">¿Qué le estás intentando hacer a mi base de datos? 👀 Te estoy vigilando y te voy a banear si sigues así.</p>
+      
+      <div className="mt-2 p-3 bg-gray-800 rounded-md text-sm overflow-x-auto">
+        <code className="text-rose-400">{dangerousQuery}</code>
+      </div>
+    </div>
+  )
+
   return (
     <div className="flex flex-col h-full bg-gray-900 border border-gray-700 rounded-lg overflow-hidden">
+      <GameModal
+        isOpen={modalOpen}
+        onClose={closeModal}
+        title="¡Alto ahí!"
+        type="warning"
+        content={<ModalContent />}
+      />
+      
       <div className="bg-gray-800 p-2 flex justify-between items-center border-b border-gray-700">
         <div className="text-sm font-mono text-gray-300">SQL Editor</div>
         <div className="flex gap-2">
@@ -111,7 +163,7 @@ export const CodeEditor: React.FC = () => {
             )}
           </div>
           <div className="flex-1 p-3 overflow-y-auto text-sm font-mono">
-            <pre className="whitespace-pre-wrap">{output || "// Aqui veras los resultados de tus consultas"}</pre>
+            <pre className="whitespace-pre-wrap">{output || "// Aquí verás los resultados de tus consultas"}</pre>
           </div>
         </div>
       </div>
