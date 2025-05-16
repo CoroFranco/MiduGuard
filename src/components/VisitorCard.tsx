@@ -12,8 +12,8 @@ import Clerk from "@/components/Clerk"
 
 interface VisitorCardProps {
   visitor?: Visitor
-  onApprove?: (id: string) => void
-  onReject?: (id: string) => void
+  onApprove?: (id: string) => void | Promise<boolean> | boolean
+  onReject?: (id: string) => void | Promise<boolean> | boolean
 }
 
 export function VisitorCard({ visitor, onApprove, onReject }: VisitorCardProps) {
@@ -21,7 +21,7 @@ export function VisitorCard({ visitor, onApprove, onReject }: VisitorCardProps) 
   const [zoomLevel, setZoomLevel] = useState(0.8)
   const [currentTab, setCurrentTab] = useState<"person" | "documents" | "skills">("person")
   const [currentVisitor, setCurrentVisitor] = useState<Visitor | undefined>(visitor)
-  const [previousVisitor, setPreviousVisitor] = useState<Visitor | null>(null)
+  const [previousVisitor, setPreviousVisitor] = useState<Visitor | null | undefined>(null)
   const [stampEffect, setStampEffect] = useState<"approved" | "rejected" | null>(null)
   const [showStampOptions, setShowStampOptions] = useState(false)
   const [isProcessingStamp, setIsProcessingStamp] = useState(false)
@@ -36,96 +36,103 @@ export function VisitorCard({ visitor, onApprove, onReject }: VisitorCardProps) 
   const previousImageRef = useRef<HTMLDivElement>(null)
   const documentRef = useRef<HTMLDivElement>(null)
 
-  const handleApproveClick = () => {
-    if (!currentVisitor || isProcessingStamp) return
-    
-    setIsProcessingStamp(true)
-    setStampEffect("approved")
-    
-    if (approveStampRef.current) {
-      if (stampOptionsRef.current) {
-        gsap.to(
-          stampOptionsRef.current,
-          { 
-            width: 0, 
-            opacity: 0,
-            x: -50,
-            duration: 0.3,
-            ease: "power2.in",
-            onComplete: () => {
-              setShowStampOptions(false)
-              
-              gsap.fromTo(
-                approveStampRef.current,
-                { rotation: -45, scale: 1.2 },
-                { 
-                  rotation: 0, 
-                  scale: 1,
-                  duration: 0.5,
-                  ease: "elastic.out(1, 0.3)",
-                  onComplete: () => {
-                    if (onApprove) {
-                      onApprove(currentVisitor.id)
-                    }                   
-                    setTimeout(() => {
-                      setStampEffect(null)
-                      setIsProcessingStamp(false)
-                    }, 5000)
-                  }
-                }
-              )
-            }
-          }
-        )
-      }
+  const handleApproveClick = async () => {
+  if (!currentVisitor || isProcessingStamp) return
+  
+  if (onApprove) {
+    const willBeProcessed = await onApprove(currentVisitor.id);
+    if (willBeProcessed === false) {
+      return;
     }
   }
   
-  const handleRejectClick = () => {
-    if (!currentVisitor || isProcessingStamp) return
-    
-    setIsProcessingStamp(true)
-    setStampEffect("rejected")
-    
-    if (rejectStampRef.current) {
-      if (stampOptionsRef.current) {
-        gsap.to(
-          stampOptionsRef.current,
-          { 
-            width: 0, 
-            opacity: 0,
-            x: -50,
-            duration: 0.3,
-            ease: "power2.in",
-            onComplete: () => {
-              setShowStampOptions(false)           
-              gsap.fromTo(
-                rejectStampRef.current,
-                { rotation: 45, scale: 1.2 },
-                { 
-                  rotation: 0, 
-                  scale: 1,
-                  duration: 0.5,
-                  ease: "elastic.out(1, 0.3)",
-                  onComplete: () => {
-                    if (onReject) {
-                      onReject(currentVisitor.id)
-                    }
-                    
-                    // Reset after delay
-                    setTimeout(() => {
-                      setStampEffect(null)
-                      setIsProcessingStamp(false)
-                    }, 1500)
-                  }
+  setIsProcessingStamp(true)
+  setStampEffect("approved")
+  
+  if (approveStampRef.current) {
+    if (stampOptionsRef.current) {
+      gsap.to(
+        stampOptionsRef.current,
+        { 
+          width: 0, 
+          opacity: 0,
+          x: -50,
+          duration: 0.3,
+          ease: "power2.in",
+          onComplete: () => {
+            setShowStampOptions(false)
+            
+            gsap.fromTo(
+              approveStampRef.current,
+              { rotation: -45, scale: 1.2 },
+              { 
+                rotation: 0, 
+                scale: 1,
+                duration: 0.5,
+                ease: "elastic.out(1, 0.3)",
+                onComplete: () => {
+                  // No llamamos a onApprove de nuevo aquí, ya lo hicimos arriba
+                  setTimeout(() => {
+                    setStampEffect(null)
+                    setIsProcessingStamp(false)
+                  }, 1500)
                 }
-              )
-            }
+              }
+            )
           }
-        )
-      }
+        }
+      )
     }
   }
+}
+
+const handleRejectClick = async () => {
+  if (!currentVisitor || isProcessingStamp) return
+
+  if (onReject) {
+    const willBeProcessed = await onReject(currentVisitor.id);
+    if (willBeProcessed === false) {
+      return;
+    }
+  }
+  
+  setIsProcessingStamp(true)
+  setStampEffect("rejected")
+  
+  if (rejectStampRef.current) {
+    if (stampOptionsRef.current) {
+      gsap.to(
+        stampOptionsRef.current,
+        { 
+          width: 0, 
+          opacity: 0,
+          x: -50,
+          duration: 0.3,
+          ease: "power2.in",
+          onComplete: () => {
+            setShowStampOptions(false)           
+            gsap.fromTo(
+              rejectStampRef.current,
+              { rotation: 45, scale: 1.2 },
+              { 
+                rotation: 0, 
+                scale: 1,
+                duration: 0.5,
+                ease: "elastic.out(1, 0.3)",
+                onComplete: () => {
+                  setTimeout(() => {
+                    setStampEffect(null)
+                    setIsProcessingStamp(false)
+                  }, 1500)
+                }
+              }
+            )
+          }
+        }
+      )
+    }
+  }
+}
 
   const toggleStampOptions = () => {
     if (isProcessingStamp) return
@@ -166,7 +173,6 @@ export function VisitorCard({ visitor, onApprove, onReject }: VisitorCardProps) 
           }
         )
       } else {
-        // Hide animation - horizontal slide back to left
         gsap.to(
           stampOptionsRef.current,
           { 
@@ -216,7 +222,6 @@ export function VisitorCard({ visitor, onApprove, onReject }: VisitorCardProps) 
     }
   }, [visitor, currentVisitor])
   
-  // Close stamp options if clicked outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -227,7 +232,6 @@ export function VisitorCard({ visitor, onApprove, onReject }: VisitorCardProps) 
         event.target instanceof Element &&
         !event.target.closest('.stamp-button')
       ) {
-        // Animate close when clicking outside
         if (stampOptionsRef.current) {
           gsap.to(
             stampOptionsRef.current,
@@ -571,7 +575,7 @@ export function VisitorCard({ visitor, onApprove, onReject }: VisitorCardProps) 
                       </div>
                       <div className="mt-2 w-full text-center">
                         <div className="border-2 border-background px-2 py-1 bg-gray-800 shadow-inner">
-                          <p className="text-xs font-bold text-backborder-background uppercase">
+                          <p className="text-xs font-bold text-backborder-background">
                             {currentVisitor?.nombre}
                           </p>
                         </div>
@@ -580,7 +584,7 @@ export function VisitorCard({ visitor, onApprove, onReject }: VisitorCardProps) 
 
                     <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-3">
                       <div>
-                        <p className="text-xs text-backborder-background font-medium uppercase">Nacionalidad</p>
+                        <p className="text-xs text-backborder-background font-medium">Nacionalidad</p>
                         <p className="text-xs font-bold text-gray-200 border-b border-background1">
                           {currentVisitor?.pais_origen}
                         </p>

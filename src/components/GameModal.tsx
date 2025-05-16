@@ -105,13 +105,12 @@ export function GameModal({
             onClick={onClose}
             className="rounded-full p-1 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
           >
-            <X className="h-5 w-5" />
+            <X className="cursor-pointer h-5 w-5" />
           </button>
         </div>
 
         {/* Body */}
         <div className="p-4 text-gray-200">
-          {/* Muestra el componente React si existe, de lo contrario muestra el mensaje de texto */}
           {content ? content : <p>{message}</p>}
         </div>
 
@@ -119,7 +118,7 @@ export function GameModal({
         <div className="flex justify-end gap-2 border-t border-gray-700 p-4">
           <button
             onClick={onClose}
-            className="rounded-lg bg-gray-700 px-4 py-2 text-sm font-medium text-white hover:bg-gray-600 transition-colors"
+            className="cursor-pointer rounded-lg bg-gray-700 px-4 py-2 text-sm font-medium text-white hover:bg-gray-600 transition-colors"
           >
             Cerrar
           </button>

@@ -7,6 +7,7 @@ import { sql } from "@codemirror/lang-sql"
 import { oneDark } from "@codemirror/theme-one-dark"
 import { Play, RotateCw } from "lucide-react"
 import { GameModal } from "@/components/GameModal"
+import { useUser } from "@clerk/nextjs"
 
 export const CodeEditor: React.FC<{
   onQueryExecuted?: (wasExecuted: boolean) => void
@@ -15,9 +16,13 @@ export const CodeEditor: React.FC<{
 
   const [code, setCode] = useState<string>(initialCode)
   const [output, setOutput] = useState<string>("")
-  const [modalOpen, setModalOpen] = useState<boolean>(false)
+  const [modalOpen, setModalOpen] = useState({ 
+    danger: false, 
+    noob: false, 
+  })
   const [dangerousQuery, setDangerousQuery] = useState<string>("")
   const editorRef = useRef<EditorView | null>(null)
+  const {user} = useUser()
 
   const createEditor = (el: HTMLDivElement | null) => {
     if (el && !editorRef.current) {
@@ -55,10 +60,15 @@ export const CodeEditor: React.FC<{
   }
 
   const executeCode = async (): Promise<void> => {
+    const normalized = code.trim().replace(/\s+/g, ' ').toUpperCase()
     if (isDangerousQuery(code)) {
       setDangerousQuery(code)
-      setModalOpen(true)
+      setModalOpen(prev => ({...prev, danger: true}))
       return
+    }
+
+    if (normalized.includes('SELECT * FROM MIDULOVERS') && !normalized.includes('WHERE') && !normalized.includes('JOIN')) {
+      setModalOpen(prev => ({...prev, noob: true}))
     }
 
     setOutput("Ejecutando código...")
@@ -102,10 +112,10 @@ export const CodeEditor: React.FC<{
   }
 
   const closeModal = () => {
-    setModalOpen(false)
+    setModalOpen(prev => ({...prev, danger:false, noob:false}))
   }
 
-  const ModalContent = () => (
+  const DangerContent = () => (
     <div className="flex flex-col gap-4">
       <p className="text-base">¿Qué le estás intentando hacer a mi base de datos? 👀 Te estoy vigilando y te voy a banear si sigues así.</p>
       
@@ -114,15 +124,36 @@ export const CodeEditor: React.FC<{
       </div>
     </div>
   )
+  const NoobContent = () => (
+    <div className="flex flex-col gap-4">
+        <p>¿Acaso piensas revisar tres millones de MiduLovers uno por uno? 🤯</p>
+        <p>
+          Prueba agregando un <code className="font-mono bg-gray-800 px-1 rounded">WHERE</code>, por ejemplo:
+        </p>
+        <pre className="mt-2 p-2 bg-gray-800 rounded text-sm font-mono text-wrap">
+          {`SELECT * FROM midulovers WHERE nombre = '${user?.username}'`};
+        </pre>
+        <p>
+         Recuerda usar el nombre exactamente como aparece, o bien agregar COLLATE NOCASE al final de la consulta para que no distinga mayúsculas de minúsculas.
+        </p>
+      </div>
+  )
 
   return (
     <div className="flex flex-col h-full bg-gray-900 border border-gray-700 rounded-lg overflow-hidden">
       <GameModal
-        isOpen={modalOpen}
+        isOpen={modalOpen.danger}
         onClose={closeModal}
         title="¡Alto ahí!"
         type="warning"
-        content={<ModalContent />}
+        content={<DangerContent />}
+      />
+      <GameModal
+        isOpen={modalOpen.noob}
+        onClose={closeModal}
+        title="Que ???!!!!"
+        type="info"
+        content={<NoobContent />}
       />
       
       <div className="bg-gray-800 p-2 flex justify-between items-center border-b border-gray-700">

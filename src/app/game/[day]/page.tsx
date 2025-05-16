@@ -16,19 +16,13 @@ import { notFound } from "next/navigation"
 import { useRouter } from "next/navigation"
 import { LoadingScreen } from "@/components/LoadingScreen"
 import { DaySummary } from "@/components/DaySummary"
+import WelcomeModal from "@/components/Welcome"
+import Tables from "@/components/Tables"
+import {driver} from "driver.js"
+import "driver.js/dist/driver.css";
 
 const VALID_GAMES = ["1", "2", "3", "4", "5"]
 const INITIAL_GAME_TIME = 300
-
-function random() {
-  const numeros = [...Array(10).keys()]
-  const resultados: number[] = []
-  while (numeros.length > 0) {
-    const idx = Math.floor(Math.random() * numeros.length)
-    resultados.push(numeros.splice(idx, 1)[0])
-  }
-  return resultados
-}
 
 export default function GamePage({ params }: { params: Promise<{ day: string }> }) {
   const { user, isLoaded } = useUser()
@@ -39,7 +33,8 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
     timeUp: false,
     levelCompleted: false,
     gameCompleted: false,
-    hasExecutedQuery: false
+    hasExecutedQuery: false,
+    masContenido: false
   })
   const [visitorsList, setVisitorsList] = useState<Visitor[]>([])
   const [visitorIndex, setVisitorIndex] = useState(0)
@@ -58,14 +53,51 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
   const visitorAreaRef = useRef<HTMLDivElement>(null)
   const consoleAreaRef = useRef<HTMLDivElement>(null)
   const airportRef = useRef<HTMLDivElement>(null)
+  const tablesButtonRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (!tablesButtonRef.current || isModalOpen.tutorial || !consoleAreaRef.current || !visitorAreaRef.current) return
+
+    const driverObj = driver({
+      showProgress: true,
+      steps: [
+        {
+          element: tablesButtonRef.current,
+          popover: {
+            title: 'Mostrar tablas',
+            description: 'Aquí puedes consultar las tablas que tienes disponible, cada dia podra cambiar, tambien se pausara el tiempo mientras estes aqui.',
+            popoverClass: 'driverjs-theme'
+          }
+        },
+        {
+          element: consoleAreaRef.current,
+          popover: {
+            title: 'Consola',
+            description: 'Aquí puedes escribir tu código SQL y ver a la derecha el resultado de la consulta.',
+            popoverClass: 'driverjs-theme'
+          }
+        },
+        {
+          element: visitorAreaRef.current,
+          popover: {
+            title: 'Consola',
+            description: 'Aquí puedes ver al Midulover que debes verificar. Tendrás varias secciones con datos de la persona, y a la derecha encontrarás un botón para abrir los sellos cuando estés seguro de tu decisión.',
+            popoverClass: 'driverjs-theme'
+          }
+        }
+      ]
+    })
+
+    driverObj.drive()
+  }, [isModalOpen.tutorial])
+
+
 
   if (!VALID_GAMES.includes(day)) {
     notFound()
   }
 
   useGlobalMusic("/game.mp3", 0.05)
-
-  // Ejecuta SQL contra tu API interna
   const executeCode = async (sql: string) => {
     try {
       const res = await fetch("/api/db", {
@@ -90,7 +122,6 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
       WHERE user_id = '${user.id}';
     `)
     
-    // Reset the timer and visitor index when advancing to the next level
     localStorage.removeItem(`gameTime-${user.id}-day-${newProgress}`)
     localStorage.removeItem(`visitorIndex-${user.id}-day-${newProgress}`)
     localStorage.removeItem(`dayCompleted-${user.id}-day-${day}`)
@@ -98,21 +129,19 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
     router.replace(`/game/${newProgress}`)
   }
 
-  // Save current game state to localStorage
+
   const saveGameState = () => {
     if (!user?.id || isLevelCompleted) return
     localStorage.setItem(`gameTime-${user.id}-day-${day}`, gameTime.toString())
     localStorage.setItem(`visitorIndex-${user.id}-day-${day}`, visitorIndex.toString())
   }
 
-  // Check if the day was already completed in a previous session
   const checkDayCompletion = () => {
     if (!user?.id) return false
     const completionStatus = localStorage.getItem(`dayCompleted-${user.id}-day-${day}`)
     return completionStatus === 'true'
   }
 
-  // Mark the day as completed
   const markDayAsCompleted = () => {
     if (!user?.id) return
     localStorage.setItem(`dayCompleted-${user.id}-day-${day}`, 'true')
@@ -137,12 +166,10 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
         setCorrectDecisions(data[0].correctas || 0)
         setWrongDecisions(data[0].incorrectas || 0)
         
-        // Check if this day was already completed
         const isDayCompleted = checkDayCompletion()
         
         if (isDayCompleted) {
           setIsLevelCompleted(true)
-          // Show the day summary modal directly
           setTimeout(() => {
             setIsModalOpen(prev => ({ 
               ...prev, 
@@ -170,11 +197,8 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
           router.replace(`/game/${progress}`)
         }
       } else {
-        // Si no tiene registro, inicializar con progreso 1
         await initScore()
         setUserProgress(1)
-        
-        // Si el día solicitado no es 1, redirigir
         if (day !== "1") {
           router.replace("/game/1")
         }
@@ -187,8 +211,8 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
 
   const initScore = async () => {
     await executeCode(`
-      INSERT INTO user_score (user_id, score, progress, correctas, incorrectas)
-      VALUES ('${user?.id}', 0, 1, 0, 0)
+      INSERT INTO user_score (user_id, score, progress, correctas, incorrectas, username)
+      VALUES ('${user?.id}', 0, 1, 0, 0, '${user?.username}')
       ON CONFLICT (user_id) DO NOTHING;
     `)
   }
@@ -197,7 +221,6 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
     if (userProgress !== null && parseInt(day) === userProgress) {
       const loadVisitors = async () => {
         const data = await executeCode(`SELECT * FROM data_game WHERE day = ${day}`)
-        // Store the order in localStorage to maintain consistency across reloads
         const orderKey = `visitorOrder-${user?.id}-day-${day}`
         let orden
         
@@ -205,7 +228,7 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
         if (savedOrder) {
           orden = JSON.parse(savedOrder)
         } else {
-          orden = random()
+          orden = [7,0,2,3,4,5,6,1,8,9]
           localStorage.setItem(orderKey, JSON.stringify(orden))
         }
         
@@ -216,57 +239,62 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
   }, [day, userProgress, user?.id])
 
 
-  const handleDecision = async (decision: "aceptar" | "rechazar") => {
-    const visitor = visitorsList[visitorIndex]
-    if (!visitor || !user?.id) return
-    if(!hasExecutedQuery) {
-      setIsModalOpen(prev => ({...prev, hasExecutedQuery: true} ) )
-      return
-    }
-    const correct = visitor.decision_correcta.toLowerCase() === decision
-    const delta = correct ? 10 : -5
-    
-
-    if (correct) {
-      setCorrectDecisions(prev => prev + 1)
-      await executeCode(`
-        UPDATE user_score
-        SET correctas = correctas + 1
-        WHERE user_id = '${user.id}';
-      `)
-    } else {
-      setWrongDecisions(prev => prev + 1)
-      await executeCode(`
-        UPDATE user_score
-        SET incorrectas = incorrectas + 1
-        WHERE user_id = '${user.id}';
-      `)
-    }
-    setHasExecutedQuery(false)
-    setScore((s) => s + delta)
-
+  const handleDecision = async (decision: "aceptar" | "rechazar" ) => {
+  const visitor = visitorsList[visitorIndex]
+  if (!visitor || !user?.id) return false
+  
+  if (!hasExecutedQuery) {
+    setIsModalOpen(prev => ({ ...prev, hasExecutedQuery: true }))
+    return false
+  }
+  if(visitorIndex === 4){
+    setIsModalOpen(prev => ({...prev, masContenido:true}))
+  }
+  const correct = visitor.decision_correcta.toLowerCase() === decision
+  const delta = correct ? 10 : -5
+  
+  if (correct) {
+    setCorrectDecisions(prev => prev + 1)
     await executeCode(`
       UPDATE user_score
-      SET score = score + ${delta}
+      SET correctas = correctas + 1
       WHERE user_id = '${user.id}';
     `)
-
-
-    if (visitorIndex === visitorsList.length - 1) {
-      setIsLevelCompleted(true)
-      markDayAsCompleted()
-      
-      if (parseInt(day) < 3) {
-        setIsModalOpen(prev => ({ ...prev, levelCompleted: true }))
-      } else {
-        setIsModalOpen(prev => ({ ...prev, gameCompleted: true }))
-      }
-    } else {
-      setVisitorIndex((i) => i + 1)
-
-      localStorage.setItem(`visitorIndex-${user.id}-day-${day}`, (visitorIndex + 1).toString())
-    }
+  } else {
+    setWrongDecisions(prev => prev + 1)
+    await executeCode(`
+      UPDATE user_score
+      SET incorrectas = incorrectas + 1
+      WHERE user_id = '${user.id}';
+    `)
   }
+  
+  setHasExecutedQuery(false)
+  
+  setScore((s) => s + delta)
+
+  await executeCode(`
+    UPDATE user_score
+    SET score = score + ${delta}
+    WHERE user_id = '${user.id}';
+  `)
+
+  if (visitorIndex === visitorsList.length - 1) {
+    setIsLevelCompleted(true)
+    markDayAsCompleted()
+    
+    if (parseInt(day) < 3) {
+      setIsModalOpen(prev => ({ ...prev, levelCompleted: true }))
+    } else {
+      setIsModalOpen(prev => ({ ...prev, gameCompleted: true }))
+    }
+  } else {
+    setVisitorIndex((i) => i + 1)
+    localStorage.setItem(`visitorIndex-${user.id}-day-${day}`, (visitorIndex + 1).toString())
+  }
+  
+  return true // Retornar true para indicar que la decisión se procesó correctamente
+}
 
   // Animaciones GSAP
   useEffect(() => {
@@ -286,7 +314,6 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
     }
   }, [user, userProgress])
 
-  // Save game state periodically to localStorage
   useEffect(() => {
     if (!user?.id || userProgress === null || isLevelCompleted) return
     
@@ -297,7 +324,6 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
     return () => clearInterval(saveInterval)
   }, [user?.id, userProgress, gameTime, visitorIndex, isLevelCompleted, day])
 
-  // Cronómetro
   useEffect(() => {
     if (isLevelCompleted || dayJustLoaded) return
 
@@ -319,7 +345,6 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
     return () => clearInterval(tid)
   }, [isModalOpen, isLevelCompleted, dayJustLoaded])
 
-  // Save game state before user leaves the page
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (user?.id && !isLevelCompleted) {
@@ -382,22 +407,28 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden relative w-full">
       <GameModal
+        isOpen={isModalOpen.masContenido}
+        onClose={() => setIsModalOpen((p) => ({ ...p, masContenido: false }))}
+        title={'Contenido'}
+        message="recuerda que hay mas tablas, vas a tener que usarlas"
+      />
+      <GameModal
         isOpen={isModalOpen.tutorial && !isLevelCompleted}
         onClose={() => setIsModalOpen((p) => ({ ...p, tutorial: false }))}
         title={`Día ${day}`}
-        message={`Lee bien los datos de cada visitante para tomar decisiones correctas.`}
+        content={<WelcomeModal />}
       />
       <GameModal
         isOpen={isModalOpen.tables}
         onClose={() => setIsModalOpen((p) => ({ ...p, tables: false }))}
         title="Tablas"
-        message="Aquí puedes consultar la estructura de datos."
+        content={<Tables />}
       />
       <GameModal
         isOpen={isModalOpen.timeUp || false}
         onClose={handleTimeUpContinue}
         title="¡Tiempo agotado!"
-        type="warning"
+        type="success"
         content={TimeUpContent}
       />
       <GameModal
@@ -424,6 +455,7 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
 
       <div className="absolute z-40 top-[20%] right-20 bg-white/50 rounded-2xl backdrop-blur-3xl flex justify-center items-center">
         <button
+        ref={tablesButtonRef}
           className="w-20 h-20 flex justify-center items-end cursor-pointer"
           onClick={() => setIsModalOpen((p) => ({ ...p, tables: true }))}
         >
