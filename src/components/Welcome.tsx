@@ -4,12 +4,26 @@ import { BadgeInfo, Stamp, Clock, Star, AlertCircle, Shield, Target, Users, Data
 import { useState } from "react";
 import { useParams } from "next/navigation";
 
+type StepContent = {
+  title: string;
+  content: React.ReactNode;
+};
+
+type DayContent = {
+  title: string;
+  steps: StepContent[];
+};
+
+type DayContentMap = {
+  [key: number]: DayContent;
+};
+
 export default function WelcomeModal() {
   const params = useParams() as { day?: string };
   const currentDay = params?.day ? parseInt(params.day, 10) : 1;
   const [currentStep, setCurrentStep] = useState(0);
   
-  const dayContent = {
+  const dayContent: DayContentMap  = {
     1: {
       title: "Día 1: Tu primera jornada",
       steps: [
