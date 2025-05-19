@@ -254,7 +254,7 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
     }
 
     loadScore()
-  }, [user?.id, isLoaded, day, router, markDayAsCompleted, initScore, checkDayCompletion])
+  }, [user?.id, isLoaded, day, router, markDayAsCompleted, initScore, checkDayCompletion, executeCode])
 
   useEffect(() => {
     if (userProgress !== null && Number.parseInt(day) === userProgress) {
@@ -275,7 +275,7 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
       }
       loadVisitors()
     }
-  }, [day, userProgress, user?.id])
+  }, [day, userProgress, user?.id, executeCode])
 
   const handleDecision = async (decision: "aceptar" | "rechazar") => {
     const visitor = visitorsList[visitorIndex]

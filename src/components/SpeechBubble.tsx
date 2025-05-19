@@ -1,7 +1,24 @@
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 
-export const SpeechBubble = ({ phrase = "¡Bienvenido a mi país!", style = "cyberpunk" }) => {
+type BubbleStyle = {
+  background: string;
+  boxShadow: string;
+  border: string;
+  textColor: string;
+  accentColor: string;
+  font: string;
+  particleColor: string;
+};
+
+type StyleVariant = "cyberpunk"; 
+
+interface SpeechBubbleProps {
+  phrase?: string;
+  style?: StyleVariant; 
+}
+
+export const SpeechBubble = ({ phrase = "¡Bienvenido a mi país!", style = "cyberpunk" }: SpeechBubbleProps) => {
   const [displayedPhrase, setDisplayedPhrase] = useState("");
   const bubbleRef = useRef(null);
   
@@ -18,7 +35,7 @@ export const SpeechBubble = ({ phrase = "¡Bienvenido a mi país!", style = "cyb
 
   }, [phrase]);
   
-  const bubbleStyles = {
+  const bubbleStyles: Record<StyleVariant, BubbleStyle> = {
     cyberpunk: {
       background: "linear-gradient(135deg, rgba(2,0,36,0.85) 0%, rgba(32,18,77,0.9) 50%, rgba(60,9,121,0.85) 100%)",
       boxShadow: "0 0 15px rgba(111, 76, 255, 0.5), 0 0 30px rgba(111, 76, 255, 0.2) inset",
