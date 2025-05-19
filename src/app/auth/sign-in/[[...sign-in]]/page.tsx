@@ -82,7 +82,7 @@ export default function SignInPage() {
   return (
     <div
       ref={pageRef}
-      className="flex min-h-screen place-items-center justify-center p-6 relative font-sans bg-background text-foreground"
+      className="flex min-h-screen place-items-center justify-center p-6 relative font-sans bg-background text-foreground overflow-auto"
     >
       <GameBackground className="z-10" />
       <div className="absolute top-6 left-6 flex items-center space-x-4 z-10">
@@ -95,7 +95,7 @@ export default function SignInPage() {
           <span className="ml-1 text-sm font-medium">Volver</span>
         </Link>
       </div>
-      <div className="absolute top-10 right-20 z-20">
+      <div className="fixed top-10 right-20 z-20">
       <SoundToggle />
       </div>
 

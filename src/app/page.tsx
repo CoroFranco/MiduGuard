@@ -99,16 +99,16 @@ export default function Home() {
   }
   
   return (
-    <div className="flex flex-col max-h-[100vh] items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8 text-foreground relative overflow-hidden" >
+    <div className="flex flex-col items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8 text-foreground relative overflow-auto" >
       <div className="absolute top-6 right-6 md:top-10 md:right-20 z-10">
       <GameBackground />
       </div>
-      <div className="absolute top-6 right-6 md:top-10 md:right-20 z-20">
+      <div className="fixed  top-6 right-6  z-20">
 
         <SoundToggle />
       </div>
       {!introCompleted ? (
-        <div className="max-w-md w-full space-y-8 flex flex-col items-center justify-center opacity-0" ref={introRef} >    
+        <div className="max-w-md w-full max-h-screen space-y-8 flex flex-col items-center justify-center opacity-0" ref={introRef} >    
           <div 
             ref={imgRef} 
             className="border-2 border-purple/20 p-4 mb-6 rounded-lg shadow-purple opacity-0 transition-all duration-300 hover:shadow-lg"
