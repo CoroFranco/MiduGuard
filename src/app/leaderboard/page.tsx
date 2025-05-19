@@ -5,7 +5,6 @@ import { UserButton, useUser } from "@clerk/nextjs"
 import gsap from "gsap"
 import { Clock, Trophy, Medal, Crown, Star, Zap, Database } from "lucide-react"
 import Image from "next/image"
-import { SoundToggle } from "@/components/SoundToggle"
 import { useGlobalMusic } from "@/hooks/useGlobalMusic"
 import { dark } from "@clerk/themes"
 import { useRouter } from "next/navigation"
@@ -159,7 +158,7 @@ export default function LeaderboardPage() {
     }
 
     loadLeaderboard()
-  }, [user?.id, isLoaded])
+  }, [user?.id, isLoaded, user?.username])
 
   useEffect(() => {
     if (!isLoaded || isLoading) return
@@ -268,6 +267,7 @@ export default function LeaderboardPage() {
               <p className="text-sm font-medium text-white">{user?.firstName || "Guardia"}</p>
               <p className="text-xs text-gray-400">Oficial de MiduGuard</p>
               <p className="text-xs text-gray-500">{user?.username}</p>
+              <p>{userRank}</p>
             </div>
             <div className="ring-2 ring-white/20 rounded-full p-0.5">
               <UserButton appearance={{ baseTheme: dark }} />

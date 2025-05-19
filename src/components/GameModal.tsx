@@ -40,7 +40,6 @@ export function GameModal({
   useEffect(() => {
     if (isOpen && autoClose) {
       const timer = setTimeout(() => {
-        onClose()
       }, autoClose)
       return () => clearTimeout(timer)
     }

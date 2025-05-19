@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 
 export default function WelcomeModal() {
-  const params = useParams();
+  const params = useParams() as { day?: string };
   const currentDay = params?.day ? parseInt(params.day, 10) : 1;
   const [currentStep, setCurrentStep] = useState(0);
   

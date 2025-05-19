@@ -1,6 +1,6 @@
 "use client"
 
-import { use, useEffect, useRef, useState } from "react"
+import { use, useCallback, useEffect, useRef, useState } from "react"
 import { UserButton, useUser } from "@clerk/nextjs"
 import gsap from "gsap"
 import { Clock, Database, BadgeInfo } from "lucide-react"
@@ -113,26 +113,29 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
     })
 
     driverObj.drive()
-  }, [isModalOpen.tutorial])
+  }, [isModalOpen.tutorial, day])
 
   if (!VALID_GAMES.includes(day)) {
     notFound()
   }
 
-  const executeCode = async (sql: string) => {
-    try {
-      const res = await fetch("/api/db", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: sql }),
-      })
-      const json = await res.json()
-      return json.rows || []
-    } catch (err) {
-      console.error("DB error:", err)
-      return []
-    }
-  }
+  const executeCode = useCallback(
+    async (sql: string): Promise<any[]> => {
+      try {
+        const res = await fetch("/api/db", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: sql }),
+        })
+        const json = await res.json()
+        return json.rows || []
+      } catch (err) {
+        console.error("DB error:", err)
+        return []
+      }
+    },
+    []
+  )
 
   const advanceToNextLevel = async () => {
     if (!user?.id) return
@@ -162,22 +165,31 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
     router.replace(`/game/${newProgress}`)
   }
 
-  const saveGameState = () => {
+  const saveGameState = useCallback(() => {
     if (!user?.id || isLevelCompleted) return
     localStorage.setItem(`gameTime-${user.id}-day-${day}`, gameTime.toString())
     localStorage.setItem(`visitorIndex-${user.id}-day-${day}`, visitorIndex.toString())
-  }
+  }, [user?.id, isLevelCompleted, day, gameTime, visitorIndex])
 
-  const checkDayCompletion = () => {
-    if (!user?.id) return false
-    const completionStatus = localStorage.getItem(`dayCompleted-${user.id}-day-${day}`)
-    return completionStatus === "true"
-  }
+  const checkDayCompletion = useCallback((): boolean => {
+  if (!user?.id) return false
+  const completionStatus = localStorage.getItem(`dayCompleted-${user.id}-day-${day}`)
+  return completionStatus === "true"
+}, [user?.id, day])
 
-  const markDayAsCompleted = () => {
+  const markDayAsCompleted = useCallback(() => {
     if (!user?.id) return
     localStorage.setItem(`dayCompleted-${user.id}-day-${day}`, "true")
-  }
+  }, [day, user?.id])
+
+  const initScore = useCallback(async () => {
+  if (!user?.id) return
+  await executeCode(`
+    INSERT INTO user_score (user_id, score, progress, correctas, incorrectas, username)
+    VALUES ('${user.id}', 0, 1, 0, 0, '${user.username}')
+    ON CONFLICT (user_id) DO NOTHING;
+  `)
+}, [executeCode, user?.id, user?.username])
 
   useEffect(() => {
     if (!isLoaded) return
@@ -242,15 +254,7 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
     }
 
     loadScore()
-  }, [user?.id, isLoaded, day, router])
-
-  const initScore = async () => {
-    await executeCode(`
-      INSERT INTO user_score (user_id, score, progress, correctas, incorrectas, username)
-      VALUES ('${user?.id}', 0, 1, 0, 0, '${user?.username}')
-      ON CONFLICT (user_id) DO NOTHING;
-    `)
-  }
+  }, [user?.id, isLoaded, day, router, markDayAsCompleted, initScore, checkDayCompletion])
 
   useEffect(() => {
     if (userProgress !== null && Number.parseInt(day) === userProgress) {
@@ -343,7 +347,7 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
     return () => {
       tl.kill()
     }
-  }, [user, userProgress])
+  }, [user, userProgress, isLoaded, shouldRedirect])
 
   useEffect(() => {
     if (!user?.id || userProgress === null || isLevelCompleted) return
@@ -353,7 +357,7 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
     }, 5000)
 
     return () => clearInterval(saveInterval)
-  }, [user?.id, userProgress, gameTime, visitorIndex, isLevelCompleted, day])
+  }, [user?.id, userProgress, gameTime, visitorIndex, isLevelCompleted, day, saveGameState])
 
   useEffect(() => {
     if (isLevelCompleted || dayJustLoaded) return
@@ -374,7 +378,7 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
     }, 1000)
 
     return () => clearInterval(tid)
-  }, [isModalOpen, isLevelCompleted, dayJustLoaded])
+  }, [isModalOpen, isLevelCompleted, dayJustLoaded, markDayAsCompleted])
 
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -385,7 +389,7 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
 
     window.addEventListener("beforeunload", handleBeforeUnload)
     return () => window.removeEventListener("beforeunload", handleBeforeUnload)
-  }, [user?.id, gameTime, visitorIndex, isLevelCompleted, day])
+  }, [user?.id, gameTime, visitorIndex, isLevelCompleted, day, saveGameState])
 
   const formatTime = (sec: number) => {
     const m = Math.floor(sec / 60)
