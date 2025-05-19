@@ -71,7 +71,6 @@ export function VisitorCard({ visitor, onApprove, onReject }: VisitorCardProps) 
                 duration: 0.5,
                 ease: "elastic.out(1, 0.3)",
                 onComplete: () => {
-                  // No llamamos a onApprove de nuevo aquí, ya lo hicimos arriba
                   setTimeout(() => {
                     setStampEffect(null)
                     setIsProcessingStamp(false)
@@ -136,10 +135,10 @@ const handleRejectClick = async () => {
 
   const toggleStampOptions = () => {
     if (isProcessingStamp) return
-    
+    const audio = new Audio('/Open.mp3')
+    audio.play()
     if (stampOptionsRef.current) {
       if (!showStampOptions) {
-        // Animate stamp button on press
         if (stampButtonRef.current) {
           gsap.to(stampButtonRef.current, {
             scale: 0.9,
@@ -155,7 +154,6 @@ const handleRejectClick = async () => {
           })
         }
         
-        // Show animation - horizontal slide from left to right with bounce effect
         setShowStampOptions(true)
         gsap.fromTo(
           stampOptionsRef.current,
@@ -274,6 +272,8 @@ const handleRejectClick = async () => {
 
   const switchTab = (tab: "person" | "documents" | "skills") => {
     if (tab !== currentTab) {
+      const audio = new Audio('/Click.mp3')
+      audio.play()
       gsap.to(`.tab-content-${currentTab}`, {
         opacity: 0,
         duration: 0.3,
@@ -294,7 +294,6 @@ const handleRejectClick = async () => {
 
   if(!visitor) return
 
-  // Parse skills into array
   const skillsArray = currentVisitor.skills ? currentVisitor.skills.split(',').map(skill => skill.trim()) : []
 
   return (
@@ -621,7 +620,6 @@ const handleRejectClick = async () => {
                   </div>
                 </div>
 
-                {/* Back of document */}
                 <div
                   className="absolute inset-0 backface-hidden bg-gray-900 border-4 border-background rounded-xl p-3 shadow-lg"
                   style={{

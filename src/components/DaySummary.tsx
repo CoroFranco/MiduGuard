@@ -9,6 +9,7 @@ interface DaySummaryProps {
   wrongDecisions: number
   timeLeft: number
   onContinue: () => void
+  isFinalDay?: boolean
 }
 
 export function DaySummary({
@@ -17,12 +18,12 @@ export function DaySummary({
   correctDecisions = 0,
   wrongDecisions = 0,
   timeLeft = 0,
-  onContinue
+  onContinue,
+  isFinalDay
 }: DaySummaryProps) {
   const totalDecisions = correctDecisions + wrongDecisions
   const accuracy = totalDecisions > 0 ? (correctDecisions / totalDecisions) * 100 : 0
   
-  // Calcula una frase de rendimiento basada en la precisión
   const getPerformancePhrase = () => {
     if (accuracy >= 90) return "¡Excelente trabajo!"
     if (accuracy >= 75) return "¡Buen trabajo!"
@@ -78,7 +79,7 @@ export function DaySummary({
           onClick={onContinue}
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 py-3 text-white transition-colors hover:bg-purple-700"
         >
-          <span>Continuar al Día {day < 3 ? day + 1 : '(Final)'}</span>
+          <span>{isFinalDay ? `Continuar al Día ${day} < 3 ? day + 1 : '(Final)'` : `Leaderboard`}</span>
           <ArrowRight className="h-4 w-4" />
         </button>
       </div>

@@ -8,6 +8,7 @@ import Link from "next/link"
 import { SoundToggle } from "@/components/SoundToggle"
 import { dark } from "@clerk/themes"
 import { useGlobalMusic } from "@/hooks/useGlobalMusic"
+import { GameBackground } from "@/components/Background"
 
 export default function SignUpPage() {
   const pageRef = useRef<HTMLDivElement>(null)
@@ -68,7 +69,7 @@ export default function SignUpPage() {
       ref={pageRef}
       className="flex min-h-screen place-items-center justify-center p-6 relative font-sans bg-background text-foreground"
     >
-      {/* Controles superiores */}
+      <GameBackground className="z-10" />
       <div className="absolute top-6 left-6 flex items-center space-x-4 z-10">
         <Link
           href="/"
@@ -79,11 +80,10 @@ export default function SignUpPage() {
           <span className="ml-1 text-sm font-medium">Volver</span>
         </Link>
       </div>
-      <div className="absolute top-6 right-6 md:top-10 md:right-20 z-10">
+      <div className="absolute top-6 right-6 md:top-10 md:right-20 z-20">
         <SoundToggle />
       </div>
 
-      {/* Card central */}
       <div className="relative z-10 w-full max-w-md">
         <div className="text-center mb-8">
           <div ref={iconRef} className="flex justify-center mb-4">
@@ -142,7 +142,6 @@ export default function SignUpPage() {
         </div>
       </div>
 
-      {/* Marca de agua */}
       <div ref={watermarkRef} className="absolute bottom-4 right-4 opacity-30">
         <p className="text-xs font-mono text-foreground/50">MIDUGUARD · REGISTRO DE PERSONAL</p>
       </div>

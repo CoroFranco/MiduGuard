@@ -8,6 +8,7 @@ import Link from "next/link"
 import { SoundToggle } from "@/components/SoundToggle"
 import { dark } from "@clerk/themes"
 import { useGlobalMusic } from "@/hooks/useGlobalMusic"
+import { GameBackground } from "@/components/Background"
 
 export default function SignInPage() {
   const pageRef = useRef<HTMLDivElement>(null)
@@ -83,7 +84,7 @@ export default function SignInPage() {
       ref={pageRef}
       className="flex min-h-screen place-items-center justify-center p-6 relative font-sans bg-background text-foreground"
     >
-      {/* Controles superiores */}
+      <GameBackground className="z-10" />
       <div className="absolute top-6 left-6 flex items-center space-x-4 z-10">
         <Link
           href="/"
@@ -94,11 +95,10 @@ export default function SignInPage() {
           <span className="ml-1 text-sm font-medium">Volver</span>
         </Link>
       </div>
-      <div className="absolute top-10 right-20">
+      <div className="absolute top-10 right-20 z-20">
       <SoundToggle />
       </div>
 
-      {/* Card central */}
       <div className="relative z-10 w-full max-w-md">
         <div className="text-center mb-8">
           <div ref={iconRef} className="flex justify-center mb-4">

@@ -165,4 +165,30 @@ body {
   border-bottom-color: #1f1b2e;
 }
 
+button {
+  cursor: pointer;
+}
 
+::-webkit-scrollbar {
+          width: 6px;
+          height: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+          background: #1a1a1a;
+          border-radius: 6px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, #7c3aed, #4f46e5);
+          border-radius: 6px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg, #8b5cf6, #6366f1);
+        }
+        
+        * {
+          scrollbar-width: thin;
+          scrollbar-color: #7c3aed #1a1a1a;
+        }

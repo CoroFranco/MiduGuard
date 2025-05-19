@@ -82,20 +82,17 @@ export function GameModal({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ${
+      className={`fixed inset-0 z-50 flex place-items-center justify-center p-4 transition-opacity duration-300 ${
         isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
       }`}
     >
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose}></div>
 
-      {/* Modal */}
       <div
-        className={`relative w-full max-w-md transform rounded-xl border-2 ${borderColor} bg-gray-900 shadow-2xl transition-all duration-300 ${
+        className={`relative w-full max-w-3xl transform rounded-xl border-2 ${borderColor} bg-gray-900 shadow-2xl transition-all duration-300 ${
           isOpen ? "scale-100" : "scale-95"
         }`}
       >
-        {/* Header */}
         <div className={`flex items-center justify-between rounded-t-lg ${bgColor} p-4`}>
           <div className="flex items-center gap-3">
             {icon}
@@ -109,12 +106,10 @@ export function GameModal({
           </button>
         </div>
 
-        {/* Body */}
-        <div className="p-4 text-gray-200">
+        <div className="p-4 text-gray-200 max-h-[60dvh] overflow-y-scroll">
           {content ? content : <p>{message}</p>}
         </div>
 
-        {/* Footer */}
         <div className="flex justify-end gap-2 border-t border-gray-700 p-4">
           <button
             onClick={onClose}

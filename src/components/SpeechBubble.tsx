@@ -18,7 +18,6 @@ export const SpeechBubble = ({ phrase = "¡Bienvenido a mi país!", style = "cyb
 
   }, [phrase]);
   
-  // Estilos de burbuja según el tema
   const bubbleStyles = {
     cyberpunk: {
       background: "linear-gradient(135deg, rgba(2,0,36,0.85) 0%, rgba(32,18,77,0.9) 50%, rgba(60,9,121,0.85) 100%)",
@@ -33,7 +32,6 @@ export const SpeechBubble = ({ phrase = "¡Bienvenido a mi país!", style = "cyb
   
   const theme = bubbleStyles[style];
   
-  // Partículas flotantes dentro de la burbuja
   const ParticleEffect = () => {
     const particles = Array(15).fill(0).map((_, i) => ({
       id: i,
@@ -75,7 +73,6 @@ export const SpeechBubble = ({ phrase = "¡Bienvenido a mi país!", style = "cyb
     );
   };
 
-  // Efecto de cursor parpadeante
   const Cursor = () => {
     return (
       <motion.span
@@ -95,11 +92,9 @@ export const SpeechBubble = ({ phrase = "¡Bienvenido a mi país!", style = "cyb
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
-        {/* Decoración superior */}
         <div className="absolute -top-3 left-6 right-6 h-1 rounded-full" 
           style={{ background: `linear-gradient(90deg, transparent, ${theme.accentColor}, transparent)` }} />
         
-        {/* Burbuja principal */}
         <div className="relative rounded-xl overflow-hidden backdrop-blur-sm"
           style={{ 
             background: theme.background,
@@ -107,17 +102,14 @@ export const SpeechBubble = ({ phrase = "¡Bienvenido a mi país!", style = "cyb
             border: theme.border
           }}>
           
-          {/* Partículas de fondo */}
           <ParticleEffect />
           
-          {/* Contenido de texto */}
           <div className="p-4 relative z-10">
             <div className={`${theme.font} ${theme.textColor} text-sm relative z-10`}>
               {displayedPhrase}
               {displayedPhrase.length === phrase.length ? null : <Cursor />}
             </div>
             
-            {/* Líneas decorativas en la parte inferior */}
             <div className="mt-3 flex gap-1 items-center">
               <motion.div 
                 className="h-px flex-grow opacity-80"
@@ -140,14 +132,12 @@ export const SpeechBubble = ({ phrase = "¡Bienvenido a mi país!", style = "cyb
             </div>
           </div>
           
-          {/* Esquina decorativa */}
           <div className="absolute right-0 bottom-0 w-4 h-4 border-r border-b"
             style={{ borderColor: theme.accentColor, opacity: 0.7 }} />
           <div className="absolute left-0 top-0 w-4 h-4 border-l border-t"
             style={{ borderColor: theme.accentColor, opacity: 0.7 }} />
         </div>
         
-        {/* Cola de la burbuja con efecto de neón */}
         <div className="relative">
           <div 
             className="absolute -bottom-5 left-8 w-6 h-6 transform rotate-45"

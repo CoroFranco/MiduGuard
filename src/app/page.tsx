@@ -11,6 +11,7 @@ import {  useUser } from '@clerk/nextjs';
 import { SoundToggle } from "@/components/SoundToggle"
 import { useGlobalMusic } from "@/hooks/useGlobalMusic"
 import { LoadingScreen } from "@/components/LoadingScreen"
+import { GameBackground } from "@/components/Background"
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(TextPlugin)
@@ -100,10 +101,14 @@ export default function Home() {
   return (
     <div className="flex flex-col max-h-[100vh] items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8 text-foreground relative overflow-hidden" >
       <div className="absolute top-6 right-6 md:top-10 md:right-20 z-10">
+      <GameBackground />
+      </div>
+      <div className="absolute top-6 right-6 md:top-10 md:right-20 z-20">
+
         <SoundToggle />
       </div>
       {!introCompleted ? (
-        <div className="max-w-md w-full space-y-8 flex flex-col items-center justify-center opacity-0" ref={introRef} >      
+        <div className="max-w-md w-full space-y-8 flex flex-col items-center justify-center opacity-0" ref={introRef} >    
           <div 
             ref={imgRef} 
             className="border-2 border-purple/20 p-4 mb-6 rounded-lg shadow-purple opacity-0 transition-all duration-300 hover:shadow-lg"
@@ -124,7 +129,9 @@ export default function Home() {
           </div>
         </div>
       ) : (
-        <div className="max-w-md w-full space-y-10 opacity-0" ref={mainContentRef}>
+        <div className="max-w-md w-full relative space-y-10 opacity-0 z-20" ref={mainContentRef}>
+
+
           <div className="text-center">
             <div className="flex justify-center mb-4">
               <div className="p-4 rounded-full bg-purple/10 shadow-purple transition-transform duration-300 hover:scale-105">
@@ -175,28 +182,28 @@ export default function Home() {
               <div className="bg-blackLight/5 p-5 rounded-lg border-l-3 border-purple shadow-md hover:shadow-purple transition-all duration-300 hover:translate-y-[-2px] group">
                 <h3 className="font-medium text-purple group-hover:text-gradient transition-all duration-300">Autenticación con Clerk</h3>
                 <p className="mt-2 text-sm text-foreground/70 font-mono">
-                  Aprende a implementar un sistema de autenticación robusto con Clerk
+                  The most comprehensive User Management Platform
                 </p>
               </div>
 
               <div className="bg-blackLight/5 p-5 rounded-lg border-l-3 border-purple/70 shadow-md hover:shadow-purple transition-all duration-300 hover:translate-y-[-2px] group">
                 <h3 className="font-medium text-purple/90 group-hover:text-gradient transition-all duration-300">SQL Interactivo</h3>
                 <p className="mt-2 text-sm text-foreground/70 font-mono">
-                  Practica consultas SQL para verificar la información de usuarios
+                  Practica consultas SQL para verificar la información de midulovers
                 </p>
               </div>
 
               <div className="bg-blackLight/5 p-5 rounded-lg border-l-3 border-purple/60 shadow-md hover:shadow-purple transition-all duration-300 hover:translate-y-[-2px] group">
                 <h3 className="font-medium text-purple/80 group-hover:text-gradient transition-all duration-300">Gameplay Inmersivo</h3>
                 <p className="mt-2 text-sm text-foreground/70 font-mono">
-                  Siente la presión de tomar decisiones mientras los Midulanders esperan
+                  Siente la presión de tomar decisiones mientras los Midulovers esperan
                 </p>
               </div>
 
               <div className="bg-blackLight/5 p-5 rounded-lg border-l-3 border-purple/50 shadow-md hover:shadow-purple transition-all duration-300 hover:translate-y-[-2px] group">
                 <h3 className="font-medium text-purple/70 group-hover:text-gradient transition-all duration-300">Aprende mientras juegas</h3>
                 <p className="mt-2 text-sm text-foreground/70 font-mono">
-                  Domina conceptos de seguridad web de manera divertida
+                  Aprender consultas SQL de una manera divertida.
                 </p>
               </div>
             </div>

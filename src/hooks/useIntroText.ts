@@ -78,7 +78,6 @@ export function useIntroText(introTexts: string[]) {
     }
   }, [introStep, introTexts, introCompleted, isLoaded])
 
-  // Reproducir sonido separado de la animación
   useEffect(() => {
     if (!audioRef.current || introCompleted || !isSoundOn) return
   
@@ -86,7 +85,6 @@ export function useIntroText(introTexts: string[]) {
       clearInterval(intervalRef.current)
     }
   
-    // Solo reproducir sonido si hay texto mostrándose (intro en curso)
     if (!document.hidden && introStep < introTexts.length) {
       intervalRef.current = setInterval(() => {
         if (!document.hidden && audioRef.current) {
@@ -107,7 +105,6 @@ export function useIntroText(introTexts: string[]) {
     }
   }, [isSoundOn, introStep, introCompleted, introTexts.length])
 
-  // Pausar sonido si se cambia de ventana
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden && audioRef.current) {

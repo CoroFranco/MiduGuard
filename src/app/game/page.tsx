@@ -5,7 +5,7 @@ export default async function GameRedirectPage() {
   const user = await currentUser();
 
   if (!user?.id) {
-    return redirect("/sign-in"); // o la ruta de inicio
+    return redirect("/sign-in"); 
   }
   const executeCode = async (sql: string) => {
     try {
