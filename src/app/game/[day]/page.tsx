@@ -430,6 +430,7 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
       wrongDecisions={wrongDecisions}
       timeLeft={0}
       onContinue={handleTimeUpContinue}
+      isFinalDay={Number.parseInt(day) >= 2}
     />
   )
 
@@ -569,7 +570,7 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        <div ref={visitorAreaRef} className="w-1/2 border-r border-border py-2 opacity-0">
+        <div ref={visitorAreaRef} className="w-full border-r border-border opacity-0">
           {currentVisitor && !isLevelCompleted && gameTime > 0 && (
             <VisitorCard
               visitor={currentVisitor}
@@ -585,7 +586,7 @@ export default function GamePage({ params }: { params: Promise<{ day: string }> 
             </div>
           )}
         </div>
-        <div ref={consoleAreaRef} className="w-1/2 p-4 min-h-[300px] opacity-0">
+        <div ref={consoleAreaRef} className="w-full min-h-[300px] opacity-0">
           <CodeEditor
             onQueryExecuted={(wasExecuted) => {
               if (wasExecuted) {

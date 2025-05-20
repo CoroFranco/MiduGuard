@@ -299,7 +299,7 @@ const handleRejectClick = async () => {
   return (
     <div
       ref={cardRef}
-      className="relative w-full mt-2 bg-gray-900 rounded-xl border-2 border-gray-700 shadow-2xl overflow-hidden flex flex-col h-full"
+      className="relative w-full bg-gray-900 rounded-xl border-2 border-gray-700 shadow-2xl overflow-hidden flex flex-col h-full"
     >
       <div className="bg-gray-800 p-2 border-b-2 border-gray-700 flex justify-between items-center shrink-0">
         <div className="flex items-center gap-2">
@@ -551,7 +551,7 @@ const handleRejectClick = async () => {
                   <div className="flex justify-between items-center border-b-2 border-background pb-2 mb-3">
                     <h2 className="text-base font-bold text-backborder-background">PERMISO DE INGRESO</h2>
                     <div className="text-right">
-                      <p className="text-xs font-mono text-backborder-background">No. {currentVisitor?.id}</p>
+                      <p className="text-xs font-mono text-backborder-background">No. {currentVisitor?.documento_id}</p>
                       <p className="text-xs text-backborder-background">
                         Fecha de ingreso: {currentVisitor?.fecha_ingreso}
                       </p>
@@ -630,7 +630,7 @@ const handleRejectClick = async () => {
                   <div className="flex justify-between items-center border-b-2 border-background pb-2 mb-3">
                     <h2 className="text-base font-bold text-backborder-background">INFORMACIÓN ADICIONAL</h2>
                     <div className="text-right">
-                      <p className="text-xs font-mono text-backborder-background">No. {currentVisitor?.id}</p>
+                      <p className="text-xs font-mono text-backborder-background">No. {currentVisitor?.documento_id}</p>
                     </div>
                   </div>
 

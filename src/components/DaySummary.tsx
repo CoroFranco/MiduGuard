@@ -77,9 +77,9 @@ export function DaySummary({
       <div className="mt-4 w-full">
         <button
           onClick={onContinue}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 py-3 text-white transition-colors hover:bg-purple-700"
+          className={!isFinalDay ? `flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 py-3 text-white transition-colors hover:bg-purple-700` : 'hidden'}
         >
-          <span>{isFinalDay ? `Continuar al Día ${day} < 3 ? day + 1 : '(Final)'` : `Leaderboard`}</span>
+          <span>{!isFinalDay ? `Continuar al Día ${day < 3 ? day + 1 : '(Final)'}` : `Leaderboard`}</span>
           <ArrowRight className="h-4 w-4" />
         </button>
       </div>

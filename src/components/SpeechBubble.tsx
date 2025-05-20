@@ -102,7 +102,7 @@ export const SpeechBubble = ({ phrase = "¡Bienvenido a mi país!", style = "cyb
   };
 
   return (
-    <div className="absolute top-6 right-6 z-30 max-w-xs md:max-w-[200px]" ref={bubbleRef}>
+    <div className="absolute top-6 right-6 z-30 2xl:max-w-xs xl:max-w-[200px]" ref={bubbleRef}>
       <motion.div
         className="relative"
         initial={{ y: -20, opacity: 0 }}

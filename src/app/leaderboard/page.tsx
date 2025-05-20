@@ -267,7 +267,7 @@ export default function LeaderboardPage() {
               <p className="text-sm font-medium text-white">{user?.firstName || "Guardia"}</p>
               <p className="text-xs text-gray-400">Oficial de MiduGuard</p>
               <p className="text-xs text-gray-500">{user?.username}</p>
-              <p>{userRank}</p>
+              <p className="hidden">{userRank}</p>
             </div>
             <div className="ring-2 ring-white/20 rounded-full p-0.5">
               <UserButton appearance={{ baseTheme: dark }} />
@@ -351,7 +351,7 @@ export default function LeaderboardPage() {
                   <div className="text-center space-y-4">
                     <div className="flex items-center justify-center gap-3 bg-black/20 py-2 px-4 rounded-full w-fit mx-auto">
                       {getRankIcon(userStats.rank)}
-                      <span className="text-lg font-medium text-white">Posición #{userStats.rank}</span>
+                      <span className="text-lg font-medium text-white hidden">Posición #{userStats.rank}</span>
                     </div>
 
                     <div className="bg-white/5 rounded-lg p-5 border border-white/10">
@@ -387,7 +387,7 @@ export default function LeaderboardPage() {
                   <div className="text-6xl mb-4 animate-bounce">🚀</div>
                   <h4 className="text-2xl font-bold text-white">DÍA 3</h4>
                   <p className="text-gray-400">
-                    Nuevos desafíos están en camino. El aeropuerto de MiduLandia necesita oficiales más experimentados.
+                    Nuevos desafíos están en camino. El aeropuerto de Midulandia necesita oficiales más experimentados.
                   </p>
                   <div className="bg-white/5 rounded-lg p-4 border border-white/10">
                     <p className="text-sm text-gray-300 font-medium">
