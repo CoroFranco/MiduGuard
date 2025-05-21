@@ -75,13 +75,13 @@ La integración se realiza en el backend de Next.js mediante sus _API Routes_, y
   <tr>
     <td align="center">
       <a href="https://github.com/CoroFranco">
-        <img src="https://avatars.githubusercontent.com/u/your-user-id" width="100px;" alt="Coro GitHub" /><br />
+        <img src="https://avatars.githubusercontent.com/u/CoroFranco" width="100px;" alt="Coro GitHub" /><br />
         <sub><b>Coro</b></sub>
       </a>
     </td>
     <td align="center">
       <a href="#">
-        <img src="https://avatars.githubusercontent.com/u/another-user-id" width="100px;" alt="Reper GitHub" /><br />
+        <br />
         <sub><b>Reper</b></sub>
       </a>
     </td>
